@@ -28,7 +28,7 @@ neighborhood_requests = {
             "unique_key" : []
         }
 
-for row in houses.itertuples():
+for row in houses.head(5).itertuples():
     if row.job_filing_num in housing_insight["house_id"]:
         continue
     mental_hosps = housing_insight["mental_hosp"]
