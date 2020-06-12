@@ -31,7 +31,6 @@ neighborhood_requests = {
 for row in houses.head(n=5).itertuples():
     if row.job_filing_num in housing_insight["house_id"]:
         continue
-    housing_insight["house_id"].append(row.job_filing_num)
     mental_hosps = housing_insight["mental_hosp"]
     address = row.house_num + " " + row.street_name
     #get latitude of house
