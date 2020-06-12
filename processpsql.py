@@ -17,7 +17,7 @@ print(databases)
 houses = databases[0]
 mental_health = databases[1]
 air_quality = databases[2]
-_requests = databases[3]
+
 housing_insight = { 
                 "house_id" : [],
                 "mental_hosp" : []
@@ -28,7 +28,7 @@ neighborhood_requests = {
             "unique_key" : []
         }
 
-for row in houses.head(5).itertuples():
+for row in houses.itertuples():
     if row.job_filing_num in housing_insight["house_id"]:
         continue
     mental_hosps = housing_insight["mental_hosp"]

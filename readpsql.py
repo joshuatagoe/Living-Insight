@@ -41,7 +41,5 @@ def get_databases():
     # read a table from database into pandas dataframe, replace "tablename" with your table name
     df2 = pd.read_sql_table('mental_health',engine)
     df = pd.read_sql_table('dob_buildings',engine)
-    df3 = pd.read_sql_table('air_quality',engine)
-    df4 = pd.read_sql_table('_311_requests',engine)
     
     return [df, df2, df3, df4]
