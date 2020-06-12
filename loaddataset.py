@@ -8,19 +8,21 @@ Created on Mon Jun  8 04:30:24 2020
 
 import googlemaps
 import pandas as pd
-import dataprocessing
+#import dataprocessing
 from datetime import datetime
 import testingprocesses
 
-gmaps = googlemaps.Client(key='')
+gmaps = googlemaps.Client(key='AIzaSyAElWTfe3ngljDcScZo52GYqo3CbT_KN6g')
 
 # Geocoding an address
-geocode_result = gmaps.geocode('1600 Amphitheatre Parkway, Mountain View, CA')
+
+geocode_result = gmaps.geocode('348 Douglass St, Brooklyn, NY 11217')
 
 # Look up an address with reverse geocoding
 reverse_geocode_result = gmaps.reverse_geocode((40.714224, -73.961452))
 print("Geocode")
 print()
+print("checking for borough")
 print(geocode_result)
 print("Reverse Geocode")
 print()
@@ -30,7 +32,7 @@ geocode_result = gmaps.geocode('Northeast Bronx')
 print(geocode_result)
 
 
-data = pd.read_csv("Air_Quality.csv")
+data = pd.read_csv("/home/joshua/Downloads/Air_Quality.csv")
 print(data)
 dataiwant = data[data.geo_type_name=="UHF42"]
 print(dataiwant)
@@ -41,13 +43,7 @@ for index,row in dataiwant.iterrows():
     
 whatineed =  set(geo_entities)
 
-for x in whatineed:
-    print(x)
-    geocode = gmaps.geocode(x)
-    lat = geocode[0]['geometry']['location']['lat']
-    lng = geocode[0]['geometry']['location']['lng']
-    location = dataprocessing.Point(lng,lat)
-    print(testingprocesses.findprecinct(location))
+
     
     
     

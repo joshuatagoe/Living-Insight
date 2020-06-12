@@ -11,13 +11,19 @@ import math
 
 
 
-
 def getLatLong(address):
     gmaps = googlemaps.Client(key='AIzaSyAElWTfe3ngljDcScZo52GYqo3CbT_KN6g')
     geocode = gmaps.geocode(address)
     lat = geocode[0]['geometry']['location']['lat']
     lng = geocode[0]['geometry']['location']['lng']
     return [ lng, lat]
+
+
+def getBorough():
+    return None
+
+def getUHF42():
+    return None
     
 #uses haversine formula
 def computeDistance(position1, position2):
