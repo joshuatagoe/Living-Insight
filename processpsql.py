@@ -8,6 +8,8 @@ Created on Thu Jun 11 20:40:15 2020
 
 import readpsql
 import computedistance
+from sqlalchemy import create_engine
+import pandas as pd
 
 databases = readpsql.get_databases()
 
@@ -24,9 +26,6 @@ for row in houses.head(n=5).itertuples():
         continue
     housing_insight["house_id"].append(row.job_filing_num)
     mental_hosps = housing_insight["mental_hosp"]
-    mental_hosps.append([])    
-    curr_row_hosps = mental_hosps[len(mental_hosps)-1]
-    
     address = row.house_num + " " + row.street_name
     #get latitude of house
     latlong = computedistance.getLatLong(address)
@@ -35,7 +34,10 @@ for row in houses.head(n=5).itertuples():
     for row_2 in mental_health.head(n=20).itertuples():
         latlong2 = [row_2.longitude, row_2.latitude ]
         if computedistance.computeDistance(latlong,latlong2) < 1.5:
-            
-            curr_row_hosps.append(row_2.query_id)
+            housing_insight["house_id"].append(row.job_filing_num)
+            mental_hosps.append(row_2.query_id)
 
-print(housing_insight)
+final_data = pd.DataFrame.from_dict(housing_insight)
+print(final_data)
+
+final_data.to_sql('housing_health_insight', create_engine(readpsql.engine_string))
