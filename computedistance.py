@@ -32,8 +32,8 @@ def computeDistance(position1, position2):
     lat = position1[1]
     long2 = position2[0]
     lat2 = position2[1]
-    rlat1 = lat * (math.pi/180)
-    rlat2 = lat2 * (math.pi/180)
+    rlat1 = lat * (3.14159265359/180)
+    rlat2 = lat2 * (3.14159265359/180)
     difflat = rlat2-rlat1 #radian difference latitude
     difflong = (long-long2)* (math.pi/180) #radian difference longitude
     d = 2 * R * math.asin(math.sqrt(math.sin(difflat/2)*math.sin(difflat/2)+math.cos(rlat1)*math.cos(rlat2)*math.sin(difflong/2)*math.sin(difflong/2)));

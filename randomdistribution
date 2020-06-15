@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jun 15 01:02:43 2020
+
+@author: joshua
+"""
+
+
+import numpy as np
+
+averages = {
+    "New York" : 3902,
+    "Manhattan" : 4208,
+    "Brooklyn" : 2951,
+    "Queens" : 2568,
+    "Bronx" : 1708,
+    "Staten Island" : 2138
+    } 
+
+def guesswork(borough):
+    avg = averages[borough]
+    sigma = 82
+    
+    s = np.random.normal(avg, sigma, 1)
+    return s[0]
+
