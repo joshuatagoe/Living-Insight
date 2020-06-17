@@ -9,16 +9,16 @@ from pyspark.sql import SparkSession
 from pyspark import SparkContext
 from pyspark.sql import Row
 from pyspark.sql.functions import lit
-from user_functions import testingprocesses
-from user_functions import dataprocessing
+import testingprocesses
+import dataprocessing
 import boto3
 
 
 
 
 sc = SparkContext("local", "SparkFile App")
-sc.addFile("/home/ubuntu/Housing-Insight/user_functions/testingprocesses.py")
-sc.addFile("/home/ubuntu/Housing-Insight/user_functions/dataprocessing.py")
+sc.addFile("/home/ubuntu/Housing-Insight/testingprocesses.py")
+sc.addFile("/home/ubuntu/Housing-Insight/dataprocessing.py")
 
 s3 = boto3.resource('s3')
 obj1 = s3.Object('living-insight-data', "Police Precincts.kml")
