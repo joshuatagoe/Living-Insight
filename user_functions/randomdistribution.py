@@ -9,6 +9,7 @@ Created on Mon Jun 15 01:02:43 2020
 
 import numpy as np
 
+#average rentprice for NYC home 
 averages = {
     "new york" : 3902,
     "manhattan" : 4208,
@@ -18,7 +19,8 @@ averages = {
     "staten island" : 2138
     } 
 
-def guesswork(borough):
+#selects random sample from a gaussian distribution which a selected mean/avg based off borugh
+def select_sample(borough):
     avg = averages[borough]
     sigma = 82
     

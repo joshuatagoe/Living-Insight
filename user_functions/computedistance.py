@@ -10,7 +10,7 @@ import math
 
 
 
-
+#uses google's geocoding api to get Latitude and Longitudes of given address
 def getLatLong(address):
     gmaps = googlemaps.Client(key='AIzaSyAElWTfe3ngljDcScZo52GYqo3CbT_KN6g')
     geocode = gmaps.geocode(address)
@@ -25,7 +25,7 @@ def getBorough():
 def getUHF42():
     return None
     
-#uses haversine formula
+#uses haversine formula to compute the distance(miles) between two points
 def computeDistance(position1, position2):
     R = 3958.8
     long = position1[0]
@@ -39,6 +39,4 @@ def computeDistance(position1, position2):
     d = 2 * R * math.asin(math.sqrt(math.sin(difflat/2)*math.sin(difflat/2)+math.cos(rlat1)*math.cos(rlat2)*math.sin(difflong/2)*math.sin(difflong/2)));
     return d;
 
-
-#print(computeDistance([-73.9674, 40.7712],[-73.9761,40.7765]))
 

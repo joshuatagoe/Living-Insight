@@ -7,58 +7,64 @@ Created on Sun Jun 14 06:54:46 2020
 
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
-from pyspark import SparkFiles
 from pyspark.sql import Row
 from pyspark.sql.functions import lit
 import testingprocesses
 import dataprocessing.py
-
-
-sc = SparkContext("local", "SparkFIle App")
-sc.addFile("/home/joshua/Documents/Housing-Insight/testingprocesses.py")
-sc.addFile("/home/joshua/Documents/Housing-Insight/dataprocessing.py")
+import boto3
 
 
 
-def process_precincts(row):
+
+sc = SparkContext("local", "SparkFile App")
+sc.addFile("/home/joshua/Documents/Housing-Insight/user_functions/testingprocesses.py")
+sc.addFile("/home/joshua/Documents/Housing-Insight/user_functions/dataprocessing.py")
+
+s3 = boto3.resource('s3')
+obj1 = s3.Object('living-insight-data', "Police Precincts.kml")
+obj2 = s3.Object('living-insight-data', "Community Districts.kml")
+precincts = obj1.get()['Body'].read()
+districts = obj2.get()['Body'].read()
+
+def process_precincts(row, dat=precincts):
     p = dataprocessing.Point(row.longitude,row.latitude)
-    precinct = testingprocesses.findprecinct(p)
+    precinct = testingprocesses.findprecinct(p, dat)
     data = row.asDict()
     row["precinct"] = precinct
     return Row(**data)
     
+def process_districts(row, dat=districts):
+    p = dataprocessing.Point(row.longitude, row.latitude)
+    district = testingprocesses.finddistrict(p,dat)
+    data = row.asDict()
+    row["community_district"] = district
+    return Row(**data)
+
+
 
 spark = SparkSession \
     .builder \
     .appName("Process to pSqL") \
     .getOrCreate()
-
-
-precincts = spark.read.format("csv") \
-    .option("header","true") \
-    .option("inferSchema","true") \
-    .load("s3a://living-insight-data/Police Precincts.kml")
-
-
-community_districts = spark.read.format("xml") \
-    .option("header","true") \
-    .option("inferSchema","true") \
-    .load("s3a://living-insight-data/Community Districts.kml")
     
     
-
-buildings = spark.read.format("csv") \
-    .option("header","true") \
-    .option("inferSchema","true") \
-    .load("s3a://living-insight-data/DOB_NOW__Build___Approved_Permits.csv")
+    
+buildings = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("dbtable","buildings") \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
     
     
 building_with_precinct_rdd = buildings.withColumn("precinct", lit(int(1))).rdd.map(process_precincts)
-
+building_with_precinct = building_with_precinct_rdd.toDF()
+print(building_with_precinct.head(5))
 
     
 
 
-air_quality.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", properties = { "user" : "postgres", "password" : "postgres" } )
+#air_quality.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", properties = { "user" : "postgres", "password" : "postgres" } )
 
 spark.stop()

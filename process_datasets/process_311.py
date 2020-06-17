@@ -54,10 +54,9 @@ _311_requests = _311_rdd.toDF()
 _311_requests.printSchema()
 print(_311_requests.head(5))
 
-mental_udf = udf(handle_building,BooleanType())
+_311_udf = udf(handle_building,BooleanType())
 
-newdataframe = buildings.limit(20).crossJoin(_311_requests.limit(20)).where(mental_udf(struct([buildings[x] for x in buildings.columns]), struct([_311_requests[x] for x in _311_requests.columns]))).select(buildings.house_id,_311_requests.unique_id)
-#data.printSchema()
+newdataframe = buildings.limit(20).crossJoin(_311_requests.limit(20)).where(_311_udf(struct([buildings[x] for x in buildings.columns]), struct([_311_requests[x] for x in _311_requests.columns]))).select(buildings.house_id,_311_requests.unique_id)
 newdataframe.limit(20).show()
 
 spark.stop()

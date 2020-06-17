@@ -23,7 +23,8 @@ def getPolygon(args):
         polygon.append(Point(arg[0],arg[1]))
     return polygon
     
-
+#determines if a point is inside a polygon
+#function taken from https://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/ 
 def isInside(polygon, n, p):
     #there must be at least 3 vertices in polygon
     if n<3:
@@ -108,52 +109,5 @@ def doIntersect(p1, q1, p2, q2):
         return True
     
     return False #doesn't fall in any of the above cases
- 
-    
-if __name__ == "__main__":
-    polygon1 = [Point(0,0), Point(10, 0), Point(10, 10), Point(0,10) ]
-    n = len(polygon1)
-    p = Point(20,20)
-    if isInside(polygon1, n, p):
-        print("Yes") 
-    else:
-        print("No")
-        
-  
-    p = Point(5,5)
-    if isInside(polygon1, n, p):
-        print("Yes") 
-    else:
-        print("No")
-        
-
-    polygon2 = [ Point(0,0), Point(5,5), Point(5,0)]
-    p = Point(3,3)
-    n = len(polygon2) 
-    if isInside(polygon2, n, p):
-        print("Yes") 
-    else:
-        print("No")
-        
-  
-    p = Point(5,1) 
-    if isInside(polygon2, n, p):
-        print("Yes") 
-    else:
-        print("No")
-  
-    p = Point(8,1)
-    if isInside(polygon2, n, p):
-        print("Yes") 
-    else:
-        print("No")
-  
-    polygon3 =  [Point(0,0), Point(10, 0), Point(10, 10), Point(0, 10)] 
-    p = Point(-1,10)
-    n = len(polygon3)
-    if isInside(polygon3, n, p):
-        print("Yes") 
-    else:
-        print("No")
   
     
