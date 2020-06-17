@@ -14,7 +14,7 @@ import computedistance
 
 
 sc = SparkContext("local", "SparkFile App")
-sc.addFile("/home/joshua/Documents/Housing-Insight/process_datasets/computedistance.py")
+sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 
 
 def handle_building(building,_311_service):
@@ -37,10 +37,14 @@ spark = SparkSession \
     .getOrCreate()
 
 
-buildings = spark.read.format("csv") \
-    .option("header","true") \
-    .option("inferSchema","true") \
-    .load("s3a://living-insight-data/DOB_NOW__Build___Approved_Permits.csv")
+buildings = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("dbtable","buildings") \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
 
     
 _311_requests = spark.read.format("csv") \
@@ -55,7 +59,7 @@ print(_311_requests.head(5))
 
 _311_udf = udf(handle_building,BooleanType())
 
-newdataframe = buildings.limit(20).crossJoin(_311_requests.limit(20)).where(_311_udf(struct([buildings[x] for x in buildings.columns]), struct([_311_requests[x] for x in _311_requests.columns]))).select(buildings.house_id,_311_requests.unique_id)
+newdataframe = buildings.limit(20).crossJoin(_311_requests.limit(200)).where(_311_udf(struct([buildings[x] for x in buildings.columns]), struct([_311_requests[x] for x in _311_requests.columns]))).select(buildings.house_id,_311_requests.unique_id)
 newdataframe.limit(20).show()
 
 spark.stop()
