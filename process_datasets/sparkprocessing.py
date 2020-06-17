@@ -8,10 +8,10 @@ Created on Sun Jun 14 06:54:46 2020
 
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
-import randomdistribution
+from user_functions import randomdistribution
 from pyspark.sql.functions import udf, struct
 from pyspark.sql.types import BooleanType
-import computedistance
+from user_functions import computedistance
 from pyspark import SparkContext
 
 sc = SparkContext("local", "SparkFIle App")
