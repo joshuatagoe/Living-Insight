@@ -30,14 +30,14 @@ def process_precincts(row, dat=precincts):
     p = dataprocessing.Point(row.longitude,row.latitude)
     precinct = testingprocesses.findprecinct(p, dat)
     data = row.asDict()
-    row["precinct"] = precinct
+    data["precinct"] = precinct
     return Row(**data)
     
 def process_districts(row, dat=districts):
     p = dataprocessing.Point(row.longitude, row.latitude)
     district = testingprocesses.finddistrict(p,dat)
     data = row.asDict()
-    row["community_district"] = district
+    data["community_district"] = district
     return Row(**data)
 
 
@@ -58,10 +58,12 @@ buildings = spark.read \
     .load()
     
     
-building_with_precinct_rdd = buildings.withColumn("precinct", lit(int(1))).rdd.map(process_precincts)
+building_with_precinct_rdd = buildings.withColumn("precinct", lit(int(1))).limit(20).rdd.map(process_precincts)
 building_with_precinct = building_with_precinct_rdd.toDF()
 print(building_with_precinct.head(5))
-
+building_with_districts_rdd = building_with_precinct.withColumn("community_district", lit(int(1))).rdd.map(process_districts)
+building_with_districts = building_with_districts_rdd.toDF()
+print(building_with_districts.head(5))
     
 
 

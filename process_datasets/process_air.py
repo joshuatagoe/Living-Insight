@@ -11,7 +11,7 @@ import computedistance
 
 
 sc = SparkContext("local", "SparkFile App")
-sc.addFile("/home/joshua/Documents/Housing-Insight/process_datasets/computedistance.py")
+sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 
 
 def handle_building(building,_311_service):
@@ -34,7 +34,7 @@ spark = SparkSession \
 air_quality = spark.read.format("csv") \
     .option("header","true") \
     .option("inferSchema","true") \
-    .load("/home/joshua/Documents/Housing-Insight/Air_Quality.csv")
+    .load("s3a://living-insight-data/Air_Quality.csv")
 
 
 air_quality.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", properties = { "user" : "postgres", "password" : "postgres" } )

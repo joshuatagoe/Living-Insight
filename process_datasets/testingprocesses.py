@@ -9,18 +9,13 @@ from fastkml import kml
 import dataprocessing
 
 
-
-
     
 def findprecinct(p, dat):
-    k = kml.KML()
-    precincts = k.from_string(dat)
+    precincts = kml.KML()
+    precincts.from_string(dat)
     features = list(precincts.features())
-    print(features)
     f2 = list(features[0].features())
-    print(f2)
     f3 = list(f2[0].features())
-    print(f3)
     for x in f3:
         placemark = x.geometry
         polygons = list(placemark.geoms)
@@ -33,14 +28,11 @@ def findprecinct(p, dat):
         
         
 def finddistrict(p, dat):
-    k = kml.KML()
-    districts = k.from_string(dat)
+    districts  = kml.KML()
+    districts.from_string(dat)
     features = list(districts.features())
-    print(features)
     f2 = list(features[0].features())
-    print(f2)
     f3 = list(f2[0].features())
-    print(f3)
     for x in f3:
         placemark = x.geometry
         polygons = list(placemark.geoms)
