@@ -7,12 +7,11 @@ Created on Sun Jun 14 06:54:46 2020
 
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
-from pyspark import SparkFiles
 import computedistance
 
 
-sc = SparkContext("local", "SparkFIle App")
-sc.addFile("/home/joshua/Documents/Housing-Insight/computedistance.py")
+sc = SparkContext("local", "SparkFile App")
+sc.addFile("/home/joshua/Documents/Housing-Insight/process_datasets/computedistance.py")
 
 
 def handle_building(building,_311_service):

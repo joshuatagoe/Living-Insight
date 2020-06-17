@@ -14,8 +14,8 @@ import computedistance
 from pyspark import SparkContext
 
 sc = SparkContext("local", "SparkFIle App")
-sc.addFile("/home/joshua/Documents/Housing-Insight/computedistance.py")
-sc.addFile("/home/joshua/Documents/Housing-Insight/randomdistribution.py")
+sc.addFile("/home/joshua/Documents/Housing-Insight/process_datasets/computedistance.py")
+sc.addFile("/home/joshua/Documents/Housing-Insight/process_datasets/randomdistribution.py")
 
 def g(x):
     print(x)

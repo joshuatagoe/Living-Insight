@@ -17,8 +17,8 @@ import boto3
 
 
 sc = SparkContext("local", "SparkFile App")
-sc.addFile("/home/ubuntu/Housing-Insight/testingprocesses.py")
-sc.addFile("/home/ubuntu/Housing-Insight/dataprocessing.py")
+sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/testingprocesses.py")
+sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/dataprocessing.py")
 
 s3 = boto3.resource('s3')
 obj1 = s3.Object('living-insight-data', "Police Precincts.kml")
