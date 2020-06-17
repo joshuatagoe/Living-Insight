@@ -15,8 +15,8 @@ import computedistance
 from pyspark import SparkContext
 
 sc = SparkContext("local", "SparkFIle App")
-sc.addFile("/home/ubuntu/Housing-Insight/computedistance.py")
-sc.addFile("/home/ubuntu/Housing-Insight/randomdistribution.py")
+sc.addFile("/home/ubuntu/Housing-Insight/user_functions/computedistance.py")
+sc.addFile("/home/ubuntu/Housing-Insight/user_functions/randomdistribution.py")
 
 def handle_building(building,mental_health):
     latlong = [building.longitude, building.latitude]
