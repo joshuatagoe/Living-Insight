@@ -78,8 +78,8 @@ proximity_udf = udf(handle_building,BooleanType())
 
 subway_entrances_diff_column = subway_entrances.withColumnRenamed('latitude', 'lat').withColumnRenamed('longitude', 'long');
 
-newdataframe1 = buildings.crossJoin(vehicle_collissions_diff_column.where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([vehicle_collissions_diff_column[x] for x in vehicle_collissions_diff_column.columns])))).select(buildings.house_id,vehicle_collissions_diff_column.collision_id)
-newdataframe2 = buildings.crossJoin(subway_entrances_diff_column.where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([subway_entrances_diff_column[x] for x in subway_entrances_diff_column.columns])))).select(buildings.house_id,subway_entrances_diff_column.object_id)
+newdataframe1 = buildings.crossJoin(vehicle_collissions_diff_column).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([vehicle_collissions_diff_column[x] for x in vehicle_collissions_diff_column.columns]))).select(buildings.house_id,vehicle_collissions_diff_column.collision_id)
+newdataframe2 = buildings.crossJoin(subway_entrances_diff_column).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([subway_entrances_diff_column[x] for x in subway_entrances_diff_column.columns]))).select(buildings.house_id,subway_entrances_diff_column.object_id)
 
 newdataframe1.limit(20).show()
 newdataframe2.limit(20).show()
