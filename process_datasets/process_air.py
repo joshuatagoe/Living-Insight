@@ -23,6 +23,7 @@ def handle_building(building,air_quality):
         else:
             return False
     if building.community_district == air_quality.geo_entity_id:
+        print("worked")
         return True
     else:
         return False
