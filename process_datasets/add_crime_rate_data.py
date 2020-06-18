@@ -18,7 +18,7 @@ sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 
 
 def handle_building(building,crime_report):
-    if building.borough != crime_report.borough or building.precinct != crime_report.precinct:
+    if building.borough != crime_report.BORO_NM or building.precinct != crime_report.ADDR_PCT_CD:
         return False
     latlong = [building.longitude, building.latitude]
     latlong2 = [cime_report.longitude, crime_report.latitude ]
@@ -28,8 +28,9 @@ def handle_building(building,crime_report):
         return False
 
 def process_data(row):
-    return Row(query_id=row['COMPLNT_NUM'], precinct=row['ADDR_PCT_CD'],borough=['BORO_NM'],offense_level=row['LAW_CAT_CD'],offense=row['OFNS_DESC'], \
-    latitude=row['Latitude'],longitude=row['Longitude'])
+    #return Row(query_id=row['COMPLNT_NUM'], precinct=row['ADDR_PCT_CD'],borough=['BORO_NM'],offense_level=row['LAW_CAT_CD'],offense=row['OFNS_DESC'], \
+    #latitude=row['Latitude'],longitude=row['Longitude'])
+    return row
 
 spark = SparkSession \
     .builder \
