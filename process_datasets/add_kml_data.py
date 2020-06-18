@@ -43,7 +43,7 @@ def process_districts(row, dat=districts):
     try:
         data["community_district"] = int(district)
     except:
-        data[community_district] = district
+        data["community_district"] = district
     return Row(**data)
 
 
@@ -63,7 +63,8 @@ buildings = spark.read \
     .option("password", "postgres") \
     .load()
     
-    
+
+print(buildings.head(5))    
 building_with_precinct_rdd = buildings.withColumn("precinct", lit(int(1))).limit(20).rdd.map(process_precincts)
 building_with_precinct = building_with_precinct_rdd.toDF()
 print(building_with_precinct.head(5))
