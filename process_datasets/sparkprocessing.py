@@ -33,7 +33,7 @@ def handle_building(building,mental_health):
 def processhouse(row):
     address = row["House No"] + " " + row["Street Name"] + " " + row["Borough"]+ " " + "New York"
     latlong = computedistance.getLatLong(address)
-    price = randomdistribution.guesswork(row["Borough"].lower())
+    price = randomdistribution.select_sample(row["Borough"].lower())
     return Row(house_id=row["Job Filing Number"], house_no=row["House No"],street_name=row["Street Name"], borough=row["Borough"], rental_price=int(price), latitude=latlong[1], longitude=latlong[0])
   
 #removes unneccessary columns from dataset and provides an extra column to keep a unique index
