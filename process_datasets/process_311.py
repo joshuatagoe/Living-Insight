@@ -33,7 +33,7 @@ def process_311(row):
 
 spark = SparkSession \
     .builder \
-    .appName("Process to pSqL") \
+    .appName("Process to pSql") \
     .getOrCreate()
 
 
@@ -59,7 +59,11 @@ print(_311_requests.head(5))
 
 _311_udf = udf(handle_building,BooleanType())
 
-newdataframe = buildings.limit(20).crossJoin(_311_requests.limit(200)).where(_311_udf(struct([buildings[x] for x in buildings.columns]), struct([_311_requests[x] for x in _311_requests.columns]))).select(buildings.house_id,_311_requests.unique_id)
+newdataframe = buildings.crossJoin(_311_requests).where(_311_udf(struct([buildings[x] for x in buildings.columns]), struct([_311_requests[x] for x in _311_requests.columns]))).select(buildings.house_id,_311_requests.unique_id)
 newdataframe.limit(20).show()
+
+newdataframe.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_311_requests", properties = { "user" : "postgres", "password" : "postgres" } )
+_311_requests.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="_311_requests", properties = { "user" : "postgres", "password" : "postgres" } )
+
 
 spark.stop()
