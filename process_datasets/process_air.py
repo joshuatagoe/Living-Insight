@@ -22,11 +22,10 @@ def handle_building(building,air_quality):
             return True 
         else:
             return False
-    if air_quality.geo_type_name == 'UHF42':
-        if building.community_district == air_quality.geo_entity_id:
-            return True
-        else:
-            return False
+    if building.community_district == air_quality.geo_entity_id:
+        return True
+    else:
+        return False
 
 spark = SparkSession \
     .builder \
