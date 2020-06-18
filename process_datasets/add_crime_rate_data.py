@@ -21,7 +21,7 @@ def handle_building(building,crime_report):
     if building.borough != crime_report.BORO_NM or building.precinct != crime_report.ADDR_PCT_CD:
         return False
     latlong = [building.longitude, building.latitude]
-    latlong2 = [cime_report.longitude, crime_report.latitude ]
+    latlong2 = [crime_report.Longitude, crime_report.Latitude ]
     if computedistance.computeDistance(latlong,latlong2) < 1.5:
         return True
     else:   
@@ -53,14 +53,12 @@ nypd_crime_data = spark.read.format("csv") \
     .option("inferSchema","true") \
     .load("s3a://living-insight-data/NYPD_Complaint_Data_Current__Year_To_Date_.csv")
     
-nypd_rdd= nypd_crime_data.rdd.map(process_data)
-nypd_crime_data = nypd_rdd.toDF()
 nypd_crime_data.printSchema()
 print(nypd_crime_data.head(5))
 
 proximity_udf = udf(handle_building,BooleanType())
 
-newdataframe = buildings.crossJoin(nypd_crime_data).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([nypd_crime_data[x] for x in nypd_crime_data.columns]))).select(buildings.house_id,nypd_crime_data.query_id)
+newdataframe = buildings.crossJoin(nypd_crime_data).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([nypd_crime_data[x] for x in nypd_crime_data.columns]))).select(buildings.house_id,nypd_crime_data.CMPLNT_NUM)
 nypd_crime_data.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="nypd_crime_data", properties = { "user" : "postgres", "password" : "postgres" } )
 newdataframe.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_id_to_crime_id", properties = { "user" : "postgres", "password" : "postgres" } )
 

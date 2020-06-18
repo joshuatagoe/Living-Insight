@@ -25,9 +25,10 @@ def handle_entrances(building,loc):
     else:   
         return False
 
-def handle_collissions(buildling,loc):
-    if building.borough.lower()!=loc.borough.lower():
-        return False
+def handle_collissions(building,loc):
+    if building.borough != None and loc.borough != None:
+        if building.borough.lower()!=loc.borough.lower():
+            return False
     latlong = [building.longitude, building.latitude]
     latlong2 = [loc.long, loc.lat ]
     if computedistance.computeDistance(latlong,latlong2) < 1.5:
@@ -85,7 +86,7 @@ subway_entrances = subway_entrances_rdd.toDF()
 print(vehicle_collissions.head(5))
 
 proximity_udf = udf(handle_collissions,BooleanType())
-priximity_udf2 = udf(handle_entrances, BooleanType())
+proximity_udf2 = udf(handle_entrances, BooleanType())
 
 
 newdataframe1 = buildings.crossJoin(vehicle_collissions).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([vehicle_collissions[x] for x in vehicle_collissions.columns]))).select(buildings.house_id,vehicle_collissions.collision_id)
@@ -93,8 +94,8 @@ newdataframe2 = buildings.crossJoin(subway_entrances).where(proximity_udf2(struc
 
 newdataframe1.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
 newdataframe2.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_subway", properties = { "user" : "postgres", "password" : "postgres" } )
-vehicle_collissions.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="subway_entrances", properties = { "user" : "postgres", "password" : "postgres" } )
-subway_entrances.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="vehicle_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
+vehicle_collissions.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="vehicle_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
+subway_entrances.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="subway_entrances", properties = { "user" : "postgres", "password" : "postgres" } )
 
 
 spark.stop()
