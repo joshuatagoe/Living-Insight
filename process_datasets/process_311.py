@@ -50,7 +50,7 @@ buildings = spark.read \
 _311_requests = spark.read.format("csv") \
     .option("header","true") \
     .option("inferSchema","true") \
-    .load(" s3a://living-insight-data/311_Service_Requests_from_2010_to_Present.csv")
+    .load("s3a://living-insight-data/311_Service_Requests_from_2010_to_Present.csv")
     
 _311_rdd = _311_requests.rdd.map(process_311)
 _311_requests = _311_rdd.toDF()
