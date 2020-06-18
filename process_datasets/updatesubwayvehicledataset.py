@@ -17,13 +17,24 @@ sc = SparkContext("local", "SparkFIle App")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/randomdistribution.py")
     
-def handle_building(building,loc):
+def handle_entrances(building,loc):
     latlong = [building.longitude, building.latitude]
     latlong2 = [loc.long, loc.lat ]
     if computedistance.computeDistance(latlong,latlong2) < 1.5:
         return True
     else:   
         return False
+
+def handle_collissions(buildling,loc):
+    if building.borough.lower()!=loc.borough.lower():
+        return False
+    latlong = [building.longitude, building.latitude]
+    latlong2 = [loc.long, loc.lat ]
+    if computedistance.computeDistance(latlong,latlong2) < 1.5:
+        return True
+    else:   
+        return False
+
 
 
 def process_entrances(row):
@@ -67,21 +78,23 @@ subway_entrances= spark.read.format("csv") \
 vehicle_collissions = vehicle_collissions.filter(vehicle_collissions["LOCATION"].isNotNull())
 vehicle_collissions_rdd = vehicle_collissions.rdd.map(process_collissions)
 vehicle_collissions = vehicle_collissions_rdd.toDF()
-vehicle_collissions_diff_column = vehicle_collissions.withColumnRenamed('borough', 'bor')
 
 subway_entrances_rdd = subway_entrances.rdd.map(process_entrances)
 subway_entrances = subway_entrances_rdd.toDF()
 
 print(vehicle_collissions.head(5))
 
-proximity_udf = udf(handle_building,BooleanType())
+proximity_udf = udf(handle_collissions,BooleanType())
+priximity_udf2 = udf(handle_entrances, BooleanType())
 
-subway_entrances_diff_column = subway_entrances.withColumnRenamed('latitude', 'lat').withColumnRenamed('longitude', 'long');
 
-newdataframe1 = buildings.crossJoin(vehicle_collissions_diff_column).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([vehicle_collissions_diff_column[x] for x in vehicle_collissions_diff_column.columns]))).select(buildings.house_id,vehicle_collissions_diff_column.collision_id)
-newdataframe2 = buildings.crossJoin(subway_entrances_diff_column).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([subway_entrances_diff_column[x] for x in subway_entrances_diff_column.columns]))).select(buildings.house_id,subway_entrances_diff_column.object_id)
+newdataframe1 = buildings.crossJoin(vehicle_collissions).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([vehicle_collissions[x] for x in vehicle_collissions.columns]))).select(buildings.house_id,vehicle_collissions.collision_id)
+newdataframe2 = buildings.crossJoin(subway_entrances).where(proximity_udf2(struct([buildings[x] for x in buildings.columns]), struct([subway_entrances[x] for x in subway_entrances.columns]))).select(buildings.house_id,subway_entrances.object_id)
 
-newdataframe1.limit(20).show()
-newdataframe2.limit(20).show()
+newdataframe1.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
+newdataframe2.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_subway", properties = { "user" : "postgres", "password" : "postgres" } )
+vehicle_collissions.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="subway_entrances", properties = { "user" : "postgres", "password" : "postgres" } )
+subway_entrances.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="vehicle_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
+
 
 spark.stop()
