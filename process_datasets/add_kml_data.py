@@ -30,14 +30,20 @@ def process_precincts(row, dat=precincts):
     p = dataprocessing.Point(row.longitude,row.latitude)
     precinct = testingprocesses.findprecinct(p, dat)
     data = row.asDict()
-    data["precinct"] = int(precinct)
+    try:
+        data["precinct"] = int(precinct)
+    except:
+        data["precinct"] = precinct
     return Row(**data)
     
 def process_districts(row, dat=districts):
     p = dataprocessing.Point(row.longitude, row.latitude)
     district = testingprocesses.finddistrict(p,dat)
     data = row.asDict()
-    data["community_district"] = int(district)
+    try:
+        data["community_district"] = int(district)
+    except:
+        data[community_district] = district
     return Row(**data)
 
 
