@@ -63,10 +63,10 @@ building_with_precinct = building_with_precinct_rdd.toDF()
 print(building_with_precinct.head(5))
 building_with_districts_rdd = building_with_precinct.withColumn("community_district", lit(int(1))).rdd.map(process_districts)
 building_with_districts = building_with_districts_rdd.toDF()
-print(building_with_districts.head(5))
+building_with_districts.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", mode="overwrite",properties = { "user" : "postgres", "password" : "postgres" })
     
 
 
-#air_quality.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", properties = { "user" : "postgres", "password" : "postgres" } )
+#air_quality.write.jdbc( )
 
 spark.stop()
