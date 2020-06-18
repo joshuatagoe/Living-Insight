@@ -8,6 +8,7 @@ Created on Sun Jun 14 06:54:46 2020
 from pyspark.sql import SparkSession
 from pyspark import SparkContext
 from pyspark.sql.functions import udf, struct
+from pyspark.sql.types import BooleanType
 import computedistance
 
 
