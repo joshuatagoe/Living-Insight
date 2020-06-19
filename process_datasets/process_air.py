@@ -31,7 +31,7 @@ def handle_building(building,air_quality):
 
 spark = SparkSession \
     .builder \
-    .appName("Process to pSqL") \
+    .appName("Process to pSql") \
     .getOrCreate()
 
 
