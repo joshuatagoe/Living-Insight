@@ -3,11 +3,31 @@ import { GoogleMap, withScriptjs, withGoogleMap } from 'react-google-maps';
 import Query from './Query'
 
 
-function Map() { 
-  return <GoogleMap 
-  defaultZoom = {11} 
-  defaultCenter = {{ lat : 40.7128, lng: -74.0060 }} 
-  />
+class Map extends React.Component{ 
+  constructor(props){
+    this.placemarks = {};
+  }
+
+  handleSubmit(event){
+    url = "http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/buildings?vehicle_collission=${this.state.vehicle_collission}&subway_entrances=${this.state.subway_entrances}&health_services=${this.state.health_services}"
+    fetch(url)
+        .then( res=> res.json())
+        .then(res=> this.setState({response: res}))
+        .catch(err=>err);
+    event.preventDefault();
+}
+  render(){
+    return <GoogleMap 
+    defaultZoom = {11} 
+    defaultCenter = {{ lat : 40.7128, lng: -74.0060 }} 
+    >
+      {this.placemarks.map((building)=>(
+      <Marker key={building.house_id} position={{lat:building.latitude, lng: building.longitude}}/>
+      ))}
+    </GoogleMap>
+
+  }
+
 }
 
 const WrappedMap = withScriptjs(withGoogleMap(Map));

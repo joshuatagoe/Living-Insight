@@ -27,7 +27,8 @@ class Query extends React.Component{
     }
 
     handleSubmit(event){
-        fetch("http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/buildings")
+        url = "http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/buildings?vehicle_collission=${this.state.vehicle_collission}&subway_entrances=${this.state.subway_entrances}&health_services=${this.state.health_services}"
+        fetch(url)
             .then( res=> res.text())
             .then(res=> this.setState({response: res}))
             .catch(err=>err);
@@ -47,9 +48,9 @@ class Query extends React.Component{
                     <label>Mental Health Services
                         <input type="number" name="health_services" value={this.state.health_services} onChange={this.handleChange}/>
                     </label>
-                    <label>Number of Police Misconduct Reports
+{/*                     <label>Number of Police Misconduct Reports
                         <input type="number" name="police_misconduct_reports" value={this.state.police_misconduct_reports} onChange={this.handleChange}/>
-                    </label>
+                    </label> */}
                 <input type="submit" value="Submit"/>
                 </form>
                 <div>{this.state.response}</div>
