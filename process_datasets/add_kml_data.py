@@ -65,7 +65,7 @@ buildings = spark.read \
     
 
 print(buildings.head(5))    
-building_with_precinct_rdd = buildings.withColumn("precinct", lit(int(1))).limit(20).rdd.map(process_precincts)
+building_with_precinct_rdd = buildings.withColumn("precinct", lit(int(1))).rdd.map(process_precincts)
 building_with_precinct = building_with_precinct_rdd.toDF()
 print(building_with_precinct.head(5))
 building_with_districts_rdd = building_with_precinct.withColumn("community_district", lit(int(1))).rdd.map(process_districts)

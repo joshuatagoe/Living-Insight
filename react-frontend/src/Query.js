@@ -17,7 +17,6 @@ class Query extends React.Component{
      }
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.callAPI = this.callAPI.bind(this);
     }
 
     handleChange(evt){
@@ -28,7 +27,7 @@ class Query extends React.Component{
     }
 
     handleSubmit(event){
-        fetch("http://localhost:9000/buildings")
+        fetch("http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/buildings")
             .then( res=> res.text())
             .then(res=> this.setState({response: res}))
             .catch(err=>err);
