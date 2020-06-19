@@ -13,14 +13,14 @@ const pool= new Pool({
 
 
 const getbuildings = (request, response) => {
-    query = ""
+/*     query = ""
     if(req.query.mentalhealthtype=="rating"):
       query+= " WHERE mental_health_rating="+req.query.mentalhealth;
     else if(req.query.mentalhealthtype=="precise"):
       query+= " WHERE mental_health_services_num="+req.query.mentalhealth;
-    
+     */
       
-    pool.query('SELECT * FROM buildings'+query, (error, results) => {
+    pool.query('SELECT * FROM buildings LIMIT 10', (error, results) => {
       if (error) {
         throw error
       }
