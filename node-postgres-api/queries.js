@@ -12,6 +12,19 @@ const pool= new Pool({
 
 
 
+
+const test = (req, resp) => {
+        
+      pool.query('SELECT * FROM buildings LIMIT 20', (error, results) => {
+        if (error) {
+          throw error
+        }
+        resp.status(200).json(results.rows)
+      })
+    }
+  
+
+
 const getbuildings = (req, resp) => {
 /*     query = ""
     if(req.query.mentalhealthtype=="rating"):
@@ -85,5 +98,6 @@ const get_subway_stations = (request, response) => {
 
   module.exports = {
       getbuildings,
+      test,
   }
 

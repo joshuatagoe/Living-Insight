@@ -17,7 +17,8 @@ app.get('/', (request, response)=>{
     response.json({ info: 'Node.js, Express, and Postgres API'})
 })
 
-app.get('/buildings',db.getbuildings)
+app.get('/buildings',db.test)
+app.get('/getbuildings',db.getbuildings)
 
 
 
