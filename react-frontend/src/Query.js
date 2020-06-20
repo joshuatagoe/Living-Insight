@@ -29,9 +29,7 @@ class Query extends React.Component{
                         <input type="number" name="police_misconduct_reports" value={this.state.police_misconduct_reports} onChange={this.props.handleChange}/>
                     </label> */}
                 <input type="submit" value="Submit"/>
-                </form>
-                <div>{this.props.data.response}</div>
-  
+                </form>  
             </div>
   
         )

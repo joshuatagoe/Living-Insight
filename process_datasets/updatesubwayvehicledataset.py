@@ -92,10 +92,11 @@ proximity_udf2 = udf(handle_entrances, BooleanType())
 newdataframe1 = buildings.crossJoin(vehicle_collissions).where(proximity_udf(struct([buildings[x] for x in buildings.columns]), struct([vehicle_collissions[x] for x in vehicle_collissions.columns]))).select(buildings.house_id,vehicle_collissions.collision_id)
 newdataframe2 = buildings.crossJoin(subway_entrances).where(proximity_udf2(struct([buildings[x] for x in buildings.columns]), struct([subway_entrances[x] for x in subway_entrances.columns]))).select(buildings.house_id,subway_entrances.object_id)
 
-newdataframe1.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
-newdataframe2.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_subway", properties = { "user" : "postgres", "password" : "postgres" } )
+
 vehicle_collissions.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="vehicle_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
 subway_entrances.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="subway_entrances", properties = { "user" : "postgres", "password" : "postgres" } )
+newdataframe1.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
+newdataframe2.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_subway", properties = { "user" : "postgres", "password" : "postgres" } )
 
 
 spark.stop()
