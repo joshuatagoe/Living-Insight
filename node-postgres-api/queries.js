@@ -66,7 +66,7 @@ const get_complaints = (request, response) => {
   
 const get_traffic_incidents = (request, response) => {
   house_id = request.query.house_id
-  pool.query('SELECT * FROM vehicle_collissions WHERE house_id='+house_id+'', (error, results) => {
+  pool.query(`WITH upd AS ( SELECT * FROM building_to_collissions WHERE house_id=${house_id} ) SELECT * FROM vehicle_collissions INNER JOIN upd ON vehicle_collissions.colission_id=upd.colission_id`, (error, results) => {
     if (error) {
       throw error
     }
