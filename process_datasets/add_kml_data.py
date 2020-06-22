@@ -64,14 +64,14 @@ buildings = spark.read \
     .load()
     
 
-print(buildings.head(5))    
+print(buildings.head(5))
 building_with_precinct_rdd = buildings.withColumn("precinct", lit(int(1))).rdd.map(process_precincts)
 building_with_precinct = building_with_precinct_rdd.toDF()
 print(building_with_precinct.head(5))
 building_with_districts_rdd = building_with_precinct.withColumn("community_district", lit(int(1))).rdd.map(process_districts)
 building_with_districts = building_with_districts_rdd.toDF()
 print(building_with_districts.head(5))
-building_with_districts.write.option("truncate", "true")jdbc("jdbc:postgresql://localhost:5432/living_insight", table="buildings", mode="overwrite",properties = { "user" : "postgres", "password" : "postgres" })
+building_with_districts.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="buildings_with_kml",properties = { "user" : "postgres", "password" : "postgres" })
     
 
 
