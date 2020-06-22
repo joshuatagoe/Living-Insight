@@ -26,7 +26,7 @@ class DetailedData extends React.Component{
     }
 
     fetch_vehicle_data(event){
-        let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_incidents?house_id=${this.props.house.house_id}`;
+        let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_incidents?house_id='${this.props.house.house_id}'`;
         fetch(url)
             .then( res=> res.json())
             .then(res=> this.setState({vehicle_collissions : res}))
