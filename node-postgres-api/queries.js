@@ -15,7 +15,7 @@ const pool= new Pool({
 
 const test = (req, resp) => {
         
-      pool.query('SELECT * FROM buildings LIMIT 20', (error, results) => {
+      pool.query('SELECT * FROM buildings LIMIT 5', (error, results) => {
         if (error) {
           throw error
         }
