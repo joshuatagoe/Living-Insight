@@ -2,21 +2,34 @@ import React from 'react';
 import {  withScriptjs, withGoogleMap} from 'react-google-maps';
 import Map from './Map';
 import Query from './Query'
+import DetailedData from './DetailedData'
+import './App.css'
 class App extends React.Component{
 
   constructor(props){
     super(props)
     this.state = {
-      vehicle_collission: 0,
-      subway_entrances: 0,
-      health_services: 0,
+      vehicle_collission1: 0,
+      subway_entrances1: 0,
+      health_services1: 0,
+      vehicle_collission2: 0,
+      subway_entrances2: 0,
+      health_services2: 0,
       police_misconduct_reports : 0,
-      response : ""
+      response : "",
+      selectedHouse: null
 
     }
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
+    this.setSelectedHouse = this.setSelectedHouse.bind(this)
   }
+
+
+  
+setSelectedHouse(building){
+    this.setState({selectedHouse:building})
+}
 
   
   handleChange(evt){
@@ -40,7 +53,7 @@ class App extends React.Component{
     const WrappedMap = withScriptjs(withGoogleMap(Map));
     return(
 
-        <div><Query data={this.state} handleChange={this.handleChange} handleSubmit={this.handleSubmit} /><div style={{ width: "100vw", height: "100vh"}}>
+        <div>{!this.state.selectedHouse && <Query setSelectedHouse={this.setSelectedHouse} response={this.state.response} data={this.state} handleChange={this.handleChange} handleSubmit={this.handleSubmit} />}<div style={{ width: "100vw", height: "100vh"}}>
             <WrappedMap 
             googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${
               process.env.REACT_APP_GOOGLE_KEY
@@ -49,7 +62,9 @@ class App extends React.Component{
             containerElement = { <div style={{height: "100%"}}/>}
             mapElement =  { <div style={{height: "100%"}}/>} 
             response={this.state.response}
+            selectHouse={this.setSelectedHouse}
             />
+            {this.state.selectedHouse && <DetailedData house={this.state.selectedHouse}></DetailedData>}
           </div>
         </div> 
     )
