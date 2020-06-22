@@ -57,13 +57,13 @@ spark = SparkSession \
     .getOrCreate()
 
 
-buildings = spark.read \
+""" buildings = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
     .option("dbtable","buildings") \
     .option("user","postgres") \
     .option("password", "postgres") \
-    .load()
+    .load() """
 
 vehicle_collissions = spark.read.format("csv") \
     .option("header","true") \
@@ -71,15 +71,17 @@ vehicle_collissions = spark.read.format("csv") \
     .load("s3a://living-insight-data/Motor_Vehicle_Collisions_Crashes.csv")
     
     
-subway_entrances= spark.read.format("csv") \
+""" subway_entrances= spark.read.format("csv") \
     .option("header","true") \
     .option("inferSchema","true") \
-    .load("s3a://living-insight-data/DOITT_SUBWAY_ENTRANCE_01_13SEPT2010.csv")
+    .load("s3a://living-insight-data/DOITT_SUBWAY_ENTRANCE_01_13SEPT2010.csv") """
   
 vehicle_collissions = vehicle_collissions.filter(vehicle_collissions["LOCATION"].isNotNull())
 vehicle_collissions_rdd = vehicle_collissions.rdd.map(process_collissions)
 vehicle_collissions = vehicle_collissions_rdd.toDF()
+vehicle_collissions.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="vehicle_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
 
+""" 
 subway_entrances_rdd = subway_entrances.rdd.map(process_entrances)
 subway_entrances = subway_entrances_rdd.toDF()
 
@@ -97,6 +99,6 @@ vehicle_collissions.write.jdbc("jdbc:postgresql://localhost:5432/living_insight"
 subway_entrances.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="subway_entrances", properties = { "user" : "postgres", "password" : "postgres" } )
 newdataframe1.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
 newdataframe2.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_subway", properties = { "user" : "postgres", "password" : "postgres" } )
-
+ """
 
 spark.stop()
