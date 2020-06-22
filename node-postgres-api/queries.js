@@ -66,7 +66,7 @@ const get_complaints = (request, response) => {
   
 const get_traffic_incidents = (request, response) => {
   house_id = request.query.house_id
-  pool.query('SELECT * FROM vechicle_collissions WHERE house_id='+house_id+'', (error, results) => {
+  pool.query('SELECT * FROM vehicle_collissions WHERE house_id='+house_id+'', (error, results) => {
     if (error) {
       throw error
     }
