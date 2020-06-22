@@ -5,13 +5,16 @@ class Query extends React.Component{
     constructor(props){
         super(props)
         this.state = { 
-            collission_query_type : 'precise',
-            entrances_query_type : 'precise',
-            health_services_query_type : 'precise',
-            police_misconduct_query_type : 'precise',
+            vehicle_collission1: 0,
+            subway_entrances1: 0,
+            health_services1: 0,
+            vehicle_collission2: 0,
+            subway_entrances2: 0,
+            health_services2: 0,
             viewquery: false
      }
      this.toggleQueries = this.toggleQueries.bind(this)
+     this.handleChange = this.handleChange.bind(this)
     }
 
     toggleQueries(){
@@ -19,6 +22,12 @@ class Query extends React.Component{
 
     }
   
+    handleChange(evt){
+        this.setState({
+            [evt.target.name] : evt.target.value
+            
+        })
+     }
     
     render(){
         let queriedhouses = this.props.response;
@@ -26,9 +35,13 @@ class Query extends React.Component{
         if(queriedhouses){
             displayhouses = queriedhouses.map((building,index)=>(
                 <div class="house">
-                    <h2 onClick={()=>{ this.props.setSelectedHouse(building)}}>{building.house_id}</h2>
+                    <span  style={{fontSize: "1rem"}} class="fa-stack fa-3x">
+                        <i class="fa fa-circle-o fa-stack-2x"></i>
+                        <strong class="fa-stack-1x">{index+1}</strong>
+                    </span>
+                    <h2 style={{cursor: "pointer"}} onClick={()=>{ this.props.setSelectedHouse(building)}}>{building.house_id}</h2>
                     <div>Address: {building.address}</div>
-                    <div></div>
+                    <div>Rental Price: {building.rental_price}</div>
 
                 </div>
             ))
@@ -37,21 +50,25 @@ class Query extends React.Component{
             <div class="sidebar">
                 <input class="searchbar" type="text" placeholder="Search..."></input>
                 <hr></hr>
-                {!this.props.viewquery && <form onSubmit={this.props.handleSubmit}>
+                {!this.props.viewquery && <form onSubmit={(e)=>{
+                    this.props.handleSubmit(this.state.vehicle_collission1, this.state.subway_entrances1, this.state.health_services1)
+                    e.preventDefault();
+                    
+                    }}>
                     <label><div>Vehicle Collissions</div>
-                        <input name="vehicle_collission1" type="number" value={this.props.data.vehicle_collission1} onChange={this.props.handleChange}/>
+                        <input name="vehicle_collission1" type="number" value={this.state.vehicle_collission1} onChange={this.handleChange}/>
                         to
-                        <input name="vehicle_collission2" type="number" value={this.props.data.vehicle_collission2} onChange={this.props.handleChange}/>
+                        <input name="vehicle_collission2" type="number" value={this.state.vehicle_collission2} onChange={this.handleChange}/>
                     </label>
                     <label><div>Subway Entrances</div>
-                        <input type="number" name="subway_entrances1" value={this.props.data.subway_entrances1} onChange={this.props.handleChange}/>
+                        <input type="number" name="subway_entrances1" value={this.state.subway_entrances1} onChange={this.handleChange}/>
                         to
-                        <input type="number" name="subway_entrances2" value={this.props.data.subway_entrances2} onChange={this.props.handleChange}/>
+                        <input type="number" name="subway_entrances2" value={this.state.subway_entrances2} onChange={this.handleChange}/>
                     </label>
                     <label><div>Mental Health Services</div>
-                        <input type="number" name="health_services1" value={this.props.data.health_services1} onChange={this.props.handleChange}/>
+                        <input type="number" name="health_services1" value={this.state.health_services1} onChange={this.handleChange}/>
                         to
-                        <input type="number" name="health_services2" value={this.props.data.health_services2} onChange={this.props.handleChange}/>
+                        <input type="number" name="health_services2" value={this.state.health_services2} onChange={this.handleChange}/>
                     </label>
   {/*                     <label>Number of Police Misconduct Reports
                         <input type="number" name="police_misconduct_reports" value={this.state.police_misconduct_reports} onChange={this.props.handleChange}/>

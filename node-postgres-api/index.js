@@ -19,6 +19,7 @@ app.get('/', (request, response)=>{
 
 app.get('/buildings',db.test)
 app.get('/getbuildings',db.getbuildings)
+app.get('/get_incidents', db.get_traffic_incidents)
 
 
 

@@ -65,8 +65,8 @@ const get_complaints = (request, response) => {
   }
   
 const get_traffic_incidents = (request, response) => {
-
-  pool.query('SELECT * from mental_health WHERE query_id=(SELECT * FROM mental_health WHERE house_id='+query+")", (error, results) => {
+  house_id = request.query.house_id
+  pool.query('SELECT * FROM vechicle_collissions WHERE house_id='+house_id+'', (error, results) => {
     if (error) {
       throw error
     }
@@ -99,5 +99,6 @@ const get_subway_stations = (request, response) => {
   module.exports = {
       getbuildings,
       test,
+      get_traffic_incidents,
   }
 
