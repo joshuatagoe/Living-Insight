@@ -51,21 +51,21 @@ class Query extends React.Component{
                 <input class="searchbar" type="text" placeholder="Search..."></input>
                 <hr></hr>
                 {!this.props.viewquery && <form onSubmit={(e)=>{
-                    this.props.handleSubmit(this.state.vehicle_collission1, this.state.subway_entrances1, this.state.health_services1)
+                    this.props.handleSubmit(this.state.vehicle_collission1, this.state.vehicle_collission2, this.state.subway_entrances1, this.state.subway_entrances2, this.state.health_services1, this.state.health_services2)
                     e.preventDefault();
                     
                     }}>
-                    <label><div>Vehicle Collissions</div>
+                    <label><div>Vehicle Collissions<div>Avg: 61509.841093117409 SD: 38094.55832552</div></div>
                         <input name="vehicle_collission1" type="number" value={this.state.vehicle_collission1} onChange={this.handleChange}/>
                         to
                         <input name="vehicle_collission2" type="number" value={this.state.vehicle_collission2} onChange={this.handleChange}/>
                     </label>
-                    <label><div>Subway Entrances</div>
+                    <label><div>Subway Entrances <div>Avg: 139.7330462863293864 SD: 111.381353080728</div></div>
                         <input type="number" name="subway_entrances1" value={this.state.subway_entrances1} onChange={this.handleChange}/>
                         to
                         <input type="number" name="subway_entrances2" value={this.state.subway_entrances2} onChange={this.handleChange}/>
                     </label>
-                    <label><div>Mental Health Services</div>
+                    <label><div>Mental Health Services  <div>Avg: 6.7795100222717149 SD: 4.2418973826743063</div></div>
                         <input type="number" name="health_services1" value={this.state.health_services1} onChange={this.handleChange}/>
                         to
                         <input type="number" name="health_services2" value={this.state.health_services2} onChange={this.handleChange}/>

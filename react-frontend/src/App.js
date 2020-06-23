@@ -27,9 +27,9 @@ setSelectedHouse(building){
   
 
 
-  handleSubmit(vehicle_collission,subway_entrances, health_services){
-    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/buildings?vehicle_collission=${vehicle_collission}&subway_entrances=${subway_entrances}&health_services=${health_services}`
-    fetch('http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/buildings')
+  handleSubmit(vehicle_collission1, vehicle_collission2, subway_entrances1, subway_entrances2, health_services1, health_services2){
+    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/getbuildings?vehicle_collission1=${vehicle_collission1}&subway_entrances1=${subway_entrances1}&health_services1=${health_services1}&vehicle_collission2=${vehicle_collission2}&subway_entrances2=${subway_entrances2}&health_services2=${health_services2}`
+    fetch(url)
         .then( res=> res.json())
         .then(res=> this.setState({response: res}))
         .catch(err=>err);
