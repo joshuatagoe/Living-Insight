@@ -33,8 +33,9 @@ def handle_building(building,_311_service):
 def process_311(row):
     return Row(unique_key=row["Unique Key"], created_data=row["Created Date"], agency = row["Agency"], agency_name=row["Agency Name"], complaint_type=row["Complaint Type"], descriptor = row["Descriptor"], location_type = row["Location Type"], incident_zip=row["Incident Zip"], incident_address=row["Incident Address"], street_name=row["Street Name"], cross_street_1 = row["Cross Street 1"], \
                cross_street_2 = row["Cross Street 2"], intersection_street_1 = row["Intersection Street 1"], intersection_street_2 = row["Intersection Street 2"], city=row["City"], landmark=row["Landmark"], \
-               community_board = row["Community Board"], bbl = row["BBL"], borough=row["Borough"], x_coordinate = row["X Coordinate (State Plane)"], y_coordinate =row["Y Coordinate (State Plane)"], open_data_channel_type=row["Open Data Channel Type"], park_facility_name = row["Park Facility Name"], park_borough=row["Park Borough"],  \
+               community_board = row["Community Board"], bbl = row["BBL"], borough=row["Borough"], x_coordinate = row["X Coordinate(State Plane)"], y_coordinate =row["Y Coordinate(State Plane)"], park_borough=row["Park Borough"],  \
                latitude=row["Latitude"], longitude=row["Longitude"], location=row["Location"])
+
 
 spark = SparkSession \
     .builder \
