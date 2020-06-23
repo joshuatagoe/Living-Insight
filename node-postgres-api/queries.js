@@ -26,14 +26,8 @@ const test = (req, resp) => {
 
 
 const getbuildings = (req, resp) => {
-/*     query = ""
-    if(req.query.mentalhealthtype=="rating"):
-      query+= " WHERE mental_health_rating="+req.query.mentalhealth;
-    else if(req.query.mentalhealthtype=="precise"):
-      query+= " WHERE mental_health_services_num="+req.query.mentalhealth;
-     */
-      
-    pool.query('SELECT * FROM final_buildings_dataset LIMIT 20 WHERE num_mental_services='+req.query.health_services+' AND num_collissions='+req.query.vehicle_collission+' AND num_subway_entrances='+req.query.subway_entrances, (error, results) => {
+
+    pool.query('SELECT * FROM final_buildings_set LIMIT 20 WHERE total_services BETWEEN '+req.query.health_services1+' AND '+ req.query.health_services2+' AND total_collissions BETWEEN '+req.query.vehicle_collission1+' AND '+req.query.vehicle_collission2+' AND total_entrances BETWEEN '+req.query.subway_entrances1+' AND '+req.query.subway_entrances2, (error, results) => {
       if (error) {
         throw error
       }
