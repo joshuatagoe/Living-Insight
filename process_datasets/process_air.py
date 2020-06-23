@@ -44,7 +44,7 @@ air_quality = spark.read.format("csv") \
 buildings = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","buildings") \
+    .option("dbtable","buildings_with_kml") \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
