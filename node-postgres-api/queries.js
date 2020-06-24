@@ -37,8 +37,8 @@ const getbuildings = (req, resp) => {
 
 
 const get_mental_health_service = (request, response) => {
-
-pool.query('SELECT * from mental_health WHERE query_id=(SELECT * FROM mental_health WHERE house_id='+query+")", (error, results) => {
+house_id = request.query.house_id
+pool.query(`WITH upd AS ( SELECT * FROM house_id_mental_health WHERE house_id='${house_id}' ) SELECT * FROM mental_health INNER JOIN upd ON mental_health.query_id=upd.query_id`, (error, results) => {
   if (error) {
     throw error
   }
@@ -60,7 +60,7 @@ const get_complaints = (request, response) => {
   
 const get_traffic_incidents = (request, response) => {
   house_id = request.query.house_id
-  pool.query(`WITH upd AS ( SELECT * FROM building_to_collissions WHERE house_id=${house_id} ) SELECT * FROM vehicle_collissions INNER JOIN upd ON vehicle_collissions.collision_id=upd.collision_id ORDER BY num_killed DESC LIMIT 20`, (error, results) => {
+  pool.query(`WITH upd AS ( SELECT * FROM building_to_collissions WHERE house_id='${house_id}') SELECT * FROM vehicle_collissions INNER JOIN upd ON vehicle_collissions.collision_id=upd.collision_id WHERE (num_injured,num_killed) IS NOT NULL ORDER BY (num_killed+num_injured) DESC LIMIT 20`, (error, results) => {
     if (error) {
       throw error
     }
@@ -70,9 +70,9 @@ const get_traffic_incidents = (request, response) => {
   }
 
 
-const get_subway_stations = (request, response) => {
-
-  pool.query('SELECT * from mental_health WHERE query_id=(SELECT * FROM mental_health WHERE house_id='+query+")", (error, results) => {
+const get_subway_entrances = (request, response) => {
+  house_id = request.query.house_id
+  pool.query(`WITH upd AS ( SELECT * FROM building_to_subway WHERE house_id='${house_id}') SELECT * FROM subway_entrances INNER JOIN upd ON subway_entrances.object_id=upd.object_id LIMIT 30`, (error, results) => {
     if (error) {
       throw error
     }
@@ -94,5 +94,7 @@ const get_subway_stations = (request, response) => {
       getbuildings,
       test,
       get_traffic_incidents,
+      get_subway_entrances,
+      get_mental_health_service,
   }
 

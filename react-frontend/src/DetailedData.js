@@ -1,5 +1,13 @@
-import React from 'react';
+import React, {useRef, useEffect} from 'react';
+import { Bar, Line, Pie } from 'react-chartjs-2';
 import './DetailedData.css'
+
+const {tableau } = window;
+
+
+
+
+
 
 class DetailedData extends React.Component{
     constructor(props){
@@ -12,36 +20,29 @@ class DetailedData extends React.Component{
             police_misconduct: null,
             air_quality: null,
         }
-
+        this.myRef = React.createRef();
         this.fetch_vehicle_data = this.fetch_vehicle_data.bind(this)
         this.fetch_mental_health = this.fetch_mental_health.bind(this)
         this.fetch_crime_data = this.fetch_crime_data.bind(this)
     }
 
     componentDidMount(){
-        this.fetch_vehicle_data();
-/*         this.fetch_mental_health();
+        this.props.getData();
+        this.initViz();
+
+        //this.fetch_vehicle_data();
+
+/*        this.fetch_mental_health();
         this.fetch_crime_data(); */
 
     }
 
-    fetch_vehicle_data(event){
-        let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_incidents?house_id='${this.props.house.house_id}'`;
-        fetch(url)
-            .then( res=> res.json())
-            .then(res=> this.setState({vehicle_collissions : res}))
-            .catch(err=>err);
-
+    initViz(){
+        let url = "https://prod-useast-a.online.tableau.com/t/livinginsight/views/living_insight/Crime_2?:showAppBanner=false&:display_count=n&:showVizHome=n&:origin=viz_share_link";
+        new tableau.Viz(this.myRef.current, url)
     }
 
-    fetch_mental_health(event){
-        let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000`;
-        fetch(url)
-            .then( res=> res.json())
-            .then(res=> this.setState({vehicle_collissions : res}))
-            .catch(err=>err);
 
-    }
 
     fetch_crime_data(event){
         let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000`;
@@ -70,9 +71,11 @@ class DetailedData extends React.Component{
         if(this.state.vehicle_collissions){
             collissions =this.state.vehicle_collissions.map(()=>( <div> test</div>))
         }
+        let tableauEmbed = (<div ref={this.myRef}></div>)
         return(
             <div class="bottombar">
-                <div class="column">
+                {tableauEmbed}
+{/*                 <div class="column">
                 {info}
                 </div>
                 <div class="column">
@@ -85,8 +88,9 @@ class DetailedData extends React.Component{
                 </div>
                 <div class="column">
                     <h2>Crime</h2>
+                    {tableauEmbed}
 
-                </div>
+                </div> */}
                
             </div>  
         )

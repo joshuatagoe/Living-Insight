@@ -1,6 +1,6 @@
 .bottombar{
 
-    height: 30%;
+    height: 50%;
     width: 100%;
     position: fixed;
     z-index: 2;
@@ -8,10 +8,6 @@
     background-color: white;
     overflow-x: hidden;
     padding-top: 20px;
-    column-count: 5;
-    column-gap: 40px;
-    column-rule-style: solid;
-    column-rule-color: lightblue;
 }
 
 

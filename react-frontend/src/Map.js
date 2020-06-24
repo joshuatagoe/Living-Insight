@@ -19,6 +19,9 @@ class Map extends React.Component{
 
   render(){
     let placemarks;
+    let detail_placemarks_mh;
+    let detail_placemarks_subway;
+    let detail_placemarks_vc;
     let apiResponse = this.props.response;
     if(apiResponse.length>0){
       placemarks = apiResponse.map((building,index)=>(
@@ -37,11 +40,50 @@ class Map extends React.Component{
         />
         ))
     }
+    if(this.props.mh_placemarks!=null){
+      detail_placemarks_mh = this.props.mh_placemarks.map((building, index)=>(
+        <Marker key={index} 
+        position={{lat:building.latitude, lng: building.longitude}}
+        icon={`http://maps.google.com/mapfiles/kml/shapes/lodging.png`}
+        />
+
+      ))
+    }
+
+      if(this.props.vc_placemarks!=null){
+        detail_placemarks_mh = this.props.vc_placemarks.map((building, index)=>(
+          <Marker key={index} 
+          position={{lat:building.lat, lng: building.long}}
+          icon={`http://maps.google.com/mapfiles/kml/shapes/earthquake.png`}
+          />
+  
+        ))
+      }
+
+        if(this.props.subway_placemarks!=null){
+          detail_placemarks_mh = this.props.subway_placemarks.map((building, index)=>(
+            <Marker key={index} 
+            position={{lat:building.lat, lng: building.long}}
+            icon={`http://maps.google.com/mapfiles/kml/shapes/rail.png`}
+            />
+    
+            
+        ))
+          }
+        let zoom = 11;
+        let center = { lat : 40.7128, lng: -74.00060}
+        if(this.props.render_detail_placemarks){
+          zoom = 13;
+          center = { lat : this.props.selectedHouse.laatitude, lng: this.props.selectHouse.longitude }
+
+        }
+
     return <GoogleMap 
-    defaultZoom = {11} 
-    defaultCenter = {{ lat : 40.7128, lng: -74.0060 }} 
+    defaultZoom = {zoom} 
+    defaultCenter = {center} 
     >
-      {placemarks}
+      {!this.props.render_detail_placemarks && placemarks}
+      {this.props.render_detail_placemarks && detail_placemarks_mh && detail_placemarks_vc && detail_placemarks_subway}
       {this.state.hoveredhouse && (
           <InfoWindow
             position={{lat:this.state.hoveredhouse.latitude, lng: this.state.hoveredhouse.longitude}}
@@ -69,5 +111,6 @@ class Map extends React.Component{
   }
 
 }
+
 
 export default Map;

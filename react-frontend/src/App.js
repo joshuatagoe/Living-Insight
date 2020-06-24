@@ -11,17 +11,56 @@ class App extends React.Component{
     this.state = {
       police_misconduct_reports : 0,
       response : "",
-      selectedHouse: null
+      selectedHouse: null,
+      renderMHVCSubway : false,
+      mh_placemarks : null,
+      vc_placemarks: null,
+      subway_placemarks: null,
 
     }
     this.handleSubmit = this.handleSubmit.bind(this)
     this.setSelectedHouse = this.setSelectedHouse.bind(this)
+    this.fetch_vehicle_data = this.fetch_vehicle_data.bind(this)
+    this.fetch_mental_health = this.fetch_mental_health.bind(this)
   }
 
+  fetch_detail_placemarks(){
+    this.fetch_vehicle_data();
+    this.fetch_mental_health();
+
+  }
+
+  fetch_vehicle_data(){
+    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_incidents?house_id='${this.state.selectedHouse.house_id}'`;
+    fetch(url)
+        .then( res=> res.json())
+        .then(res=> this.setState({vc_placemarks: res}))
+        .catch(err=>err);
+
+}
+
+fetch_mental_health(){
+    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_health_services?house_id='${this.state.selectedHouse.house_id}`;
+    fetch(url)
+        .then( res=> res.json())
+        .then(res=> this.setState({mh_placemarks : res}))
+        .catch(err=>err);
+
+}
+
+fetch_subway_entrances(){
+  let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_subway_entrances?house_id='${this.state.selectedHouse.house_id}`;
+  fetch(url)
+      .then( res=> res.json())
+      .then(res=> this.setState({subway_placemarks : res}))
+      .catch(err=>err);
+
+}
 
   
 setSelectedHouse(building){
-    this.setState({selectedHouse:building})
+    this.setState({selectedHouse:building,
+    renderMHVCSubway: true})
 }
 
   
@@ -50,9 +89,14 @@ setSelectedHouse(building){
             mapElement =  { <div style={{height: "100%"}}/>} 
             response={this.state.response}
             selectHouse={this.setSelectedHouse}
+            render_detail_placemarks={this.state.renderMHVCSubway}
+            mh_placemarks={this.state.mh_placemarks}
+            vc_placemarks={this.state.vc_placemarks}
+            subway_placemarks={this.state.subway_placemarks}
+            selectedHouse = {this.state.selectedHouse}
             
             />
-            {this.state.selectedHouse && <DetailedData house={this.state.selectedHouse}></DetailedData>}
+            {this.state.selectedHouse && <DetailedData getData={this.fetch_detail_placemarks} house={this.state.selectedHouse}></DetailedData>}
           </div>
         </div> 
     )
