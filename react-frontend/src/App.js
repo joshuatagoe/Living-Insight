@@ -22,11 +22,14 @@ class App extends React.Component{
     this.setSelectedHouse = this.setSelectedHouse.bind(this)
     this.fetch_vehicle_data = this.fetch_vehicle_data.bind(this)
     this.fetch_mental_health = this.fetch_mental_health.bind(this)
+    this.fetch_subway_entrances = this.fetch_subway_entrances.bind(this)
+    this.fetch_detail_placemarks = this.fetch_detail_placemarks.bind(this)
   }
 
   fetch_detail_placemarks(){
     this.fetch_vehicle_data();
     this.fetch_mental_health();
+    this.fetch_subway_entrances();
 
   }
 
@@ -40,7 +43,7 @@ class App extends React.Component{
 }
 
 fetch_mental_health(){
-    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_health_services?house_id='${this.state.selectedHouse.house_id}`;
+    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_health_services?house_id='${this.state.selectedHouse.house_id}'`;
     fetch(url)
         .then( res=> res.json())
         .then(res=> this.setState({mh_placemarks : res}))
@@ -49,7 +52,7 @@ fetch_mental_health(){
 }
 
 fetch_subway_entrances(){
-  let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_subway_entrances?house_id='${this.state.selectedHouse.house_id}`;
+  let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/get_subway_entrances?house_id='${this.state.selectedHouse.house_id}'`;
   fetch(url)
       .then( res=> res.json())
       .then(res=> this.setState({subway_placemarks : res}))
@@ -66,8 +69,8 @@ setSelectedHouse(building){
   
 
 
-  handleSubmit(vehicle_collission1, vehicle_collission2, subway_entrances1, subway_entrances2, health_services1, health_services2){
-    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/getbuildings?vehicle_collission1=${vehicle_collission1}&subway_entrances1=${subway_entrances1}&health_services1=${health_services1}&vehicle_collission2=${vehicle_collission2}&subway_entrances2=${subway_entrances2}&health_services2=${health_services2}`
+  handleSubmit(vehicle_collission1, vehicle_collission2, subway_entrances1, subway_entrances2, health_services1, health_services2, crimes1, crimes2){
+    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/getbuildings?vehicle_collission1=${vehicle_collission1}&subway_entrances1=${subway_entrances1}&health_services1=${health_services1}&vehicle_collission2=${vehicle_collission2}&subway_entrances2=${subway_entrances2}&health_services2=${health_services2}&crimes1=${crimes1}&crimes2=${crimes2}`
     fetch(url)
         .then( res=> res.json())
         .then(res=> this.setState({response: res}))

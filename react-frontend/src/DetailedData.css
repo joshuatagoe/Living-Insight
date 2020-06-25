@@ -1,6 +1,6 @@
 .bottombar{
 
-    height: 50%;
+    height: 35%;
     width: 100%;
     position: fixed;
     z-index: 2;
@@ -10,7 +10,3 @@
     padding-top: 20px;
 }
 
-
-.column{
-
-}

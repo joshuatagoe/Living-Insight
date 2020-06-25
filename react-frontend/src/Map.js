@@ -44,27 +44,27 @@ class Map extends React.Component{
       detail_placemarks_mh = this.props.mh_placemarks.map((building, index)=>(
         <Marker key={index} 
         position={{lat:building.latitude, lng: building.longitude}}
-        icon={`http://maps.google.com/mapfiles/kml/shapes/lodging.png`}
+        icon={{url:`http://maps.google.com/mapfiles/kml/shapes/lodging.png`, scaledSize: new window.google.maps.Size(15,15)}}
         />
 
       ))
     }
 
       if(this.props.vc_placemarks!=null){
-        detail_placemarks_mh = this.props.vc_placemarks.map((building, index)=>(
+        detail_placemarks_vc = this.props.vc_placemarks.map((building, index)=>(
           <Marker key={index} 
           position={{lat:building.lat, lng: building.long}}
-          icon={`http://maps.google.com/mapfiles/kml/shapes/earthquake.png`}
+          icon={{ url: `http://maps.google.com/mapfiles/kml/shapes/earthquake.png`, scaledSize: new window.google.maps.Size(15,15)}}
           />
   
         ))
       }
 
         if(this.props.subway_placemarks!=null){
-          detail_placemarks_mh = this.props.subway_placemarks.map((building, index)=>(
+          detail_placemarks_subway = this.props.subway_placemarks.map((building, index)=>(
             <Marker key={index} 
             position={{lat:building.lat, lng: building.long}}
-            icon={`http://maps.google.com/mapfiles/kml/shapes/rail.png`}
+            icon={{ url:`http://maps.google.com/mapfiles/kml/shapes/rail.png`, scaledSize: new window.google.maps.Size(15,15)}}
             />
     
             
@@ -72,18 +72,23 @@ class Map extends React.Component{
           }
         let zoom = 11;
         let center = { lat : 40.7128, lng: -74.00060}
+        let curr;
         if(this.props.render_detail_placemarks){
           zoom = 13;
-          center = { lat : this.props.selectedHouse.laatitude, lng: this.props.selectHouse.longitude }
+          center = { lat : this.props.selectedHouse.latitude, lng: this.props.selectedHouse.longitude }
+          curr = <Marker position={{lat:this.props.selectedHouse.latitude, lng:this.props.selectedHouse.longitude}}/>
 
         }
 
     return <GoogleMap 
-    defaultZoom = {zoom} 
+    defaultZoom = {zoom}
     defaultCenter = {center} 
     >
+      {this.props.render_detail_placemarks && curr}
+      {this.props.render_detail_placemarks && detail_placemarks_mh}
+      {this.props.render_detail_placemarks && detail_placemarks_vc}
+      {this.props.render_detail_placemarks && detail_placemarks_subway}
       {!this.props.render_detail_placemarks && placemarks}
-      {this.props.render_detail_placemarks && detail_placemarks_mh && detail_placemarks_vc && detail_placemarks_subway}
       {this.state.hoveredhouse && (
           <InfoWindow
             position={{lat:this.state.hoveredhouse.latitude, lng: this.state.hoveredhouse.longitude}}

@@ -21,9 +21,6 @@ class DetailedData extends React.Component{
             air_quality: null,
         }
         this.myRef = React.createRef();
-        this.fetch_vehicle_data = this.fetch_vehicle_data.bind(this)
-        this.fetch_mental_health = this.fetch_mental_health.bind(this)
-        this.fetch_crime_data = this.fetch_crime_data.bind(this)
     }
 
     componentDidMount(){

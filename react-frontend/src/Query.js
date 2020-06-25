@@ -11,6 +11,8 @@ class Query extends React.Component{
             vehicle_collission2: 0,
             subway_entrances2: 0,
             health_services2: 0,
+            crimes1 : 0,
+            crimes2 : 0,
             viewquery: false
      }
      this.toggleQueries = this.toggleQueries.bind(this)
@@ -51,7 +53,7 @@ class Query extends React.Component{
                 <input class="searchbar" type="text" placeholder="Search..."></input>
                 <hr></hr>
                 {!this.props.viewquery && <form onSubmit={(e)=>{
-                    this.props.handleSubmit(this.state.vehicle_collission1, this.state.vehicle_collission2, this.state.subway_entrances1, this.state.subway_entrances2, this.state.health_services1, this.state.health_services2)
+                    this.props.handleSubmit(this.state.vehicle_collission1, this.state.vehicle_collission2, this.state.subway_entrances1, this.state.subway_entrances2, this.state.health_services1, this.state.health_services2, this.state.crimes1, this.state.crimes2)
                     e.preventDefault();
                     
                     }}>
@@ -69,6 +71,11 @@ class Query extends React.Component{
                         <input type="number" name="health_services1" value={this.state.health_services1} onChange={this.handleChange}/>
                         to
                         <input type="number" name="health_services2" value={this.state.health_services2} onChange={this.handleChange}/>
+                    </label>
+                    <label><div>NYPD Complaints (Felonies, Misdemeanors, Violations)</div>
+                        <input type="number" name="crimes1" value={this.state.crimes1} onChange={this.handleChange}/>
+                        to
+                        <input type="number" name="crimes2" value={this.state.crimes2} onChange={this.handleChange}/>
                     </label>
   {/*                     <label>Number of Police Misconduct Reports
                         <input type="number" name="police_misconduct_reports" value={this.state.police_misconduct_reports} onChange={this.props.handleChange}/>
