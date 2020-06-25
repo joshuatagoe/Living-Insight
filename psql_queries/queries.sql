@@ -20,6 +20,11 @@ CREATE TABLE num_violations AS SELECT house_id, COUNT(*) AS total_violations FRO
 CREATE TABLE felonies_aggregate_data AS SELECT avg(total_felonies) AS mean_felonies, stddev(total_felonies) AS sd_felonies FROM num_felonies;
 CREATE TABLE misdemeanors_aggregate_data AS SELECT avg(total_misdemeanors) AS mean_misdemeanors, stddev(total_misdemeanors) AS sd_misdemeanors FROM num_misdemeanors;
 CREATE TABLE violations_aggregate_data AS SELECT avg(total_violations) AS mean_violations, stddev(total_violations) AS sd_violations FROM num_violations;
+
+/* get total crimes committed */
+CREATE TABLE num_crimes AS SELECT house_id, COUNT(*) AS total_crimes FROM building_id_to_crime_id NATURAL JOIN nypd_crime_data GROUP BY house_id;
+CREATE TABLE crimes_aggregate_data AS SELECT avg(total_crimes) AS mean_crimes, stddev(total_crimes) AS sd_crimes FROM num_crimes;
+
 /*run this query whenever you need to calculate # of complaints for each crime type, KY_CD and arrange by most frequently occuring */
 SELECT "KY_CD", "OFNS_DESC" COUNT(*) AS total_complaints FROM building_id_to_crime_id NATURAL JOIN nypd_crime_data WHERE "house_id"='B00269850-I1' GROUP BY "KY_CD" ORDER BY total_complaints DESC;
 
@@ -44,4 +49,4 @@ CREATE TABLE num_collissions AS SELECT house_id, COUNT(*) AS total_collissions, 
 CREATE TABLE collissions_aggregate_data AS SELECT avg(total_collissions) AS mean_collissions, stddev(total_collissions) AS sd_collissions, avg(total_injured) AS avg_injured, stddev(total_injured) AS sd_injured, avg(total_killed) AS avg_killed, stddev(total_killed) AS sd_killed, AVG(total_affected) AS avg_affected, stddev(total_affected) AS sd_affected FROM num_collissions;
 
 /* create new table that JOINs all tables to main buildings table */
-CREATE TABLE final_buildings_set AS SELECT * FROM buildings_with_kml NATURAL JOIN  num_services NATURAL JOIN mh_aggregate_data NATURAL JOIN num_subway NATURAL JOIN num_collissions NATURAL JOIN num_felonies NATURAL JOIN num_misdemeanors NATURAL JOIN num_violations;
+CREATE TABLE final_buildings_set AS SELECT * FROM buildings_with_kml NATURAL JOIN  num_services NATURAL JOIN mh_aggregate_data NATURAL JOIN num_subway NATURAL JOIN num_collissions NATURAL JOIN num_felonies NATURAL JOIN num_misdemeanors NATURAL JOIN num_violations NATURAL JOIN num_crimes;

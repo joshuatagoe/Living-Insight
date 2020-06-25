@@ -72,7 +72,7 @@ class Query extends React.Component{
                         to
                         <input type="number" name="health_services2" value={this.state.health_services2} onChange={this.handleChange}/>
                     </label>
-                    <label><div>NYPD Complaints (Felonies, Misdemeanors, Violations)</div>
+                    <label><div>NYPD Complaints (Felonies, Misdemeanors, Violations)<div>Avg: 1310.2647657841140530 SD: 601.820533292486</div></div>
                         <input type="number" name="crimes1" value={this.state.crimes1} onChange={this.handleChange}/>
                         to
                         <input type="number" name="crimes2" value={this.state.crimes2} onChange={this.handleChange}/>
