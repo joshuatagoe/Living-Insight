@@ -27,7 +27,7 @@ const test = (req, resp) => {
 
 const getbuildings = (req, resp) => {
 
-    pool.query('SELECT * FROM final_buildings_set WHERE total_services BETWEEN '+req.query.health_services1+' AND '+ req.query.health_services2+' AND total_collissions BETWEEN '+req.query.vehicle_collission1+' AND '+req.query.vehicle_collission2+' AND total_entrances BETWEEN '+req.query.subway_entrances1+' AND '+req.query.subway_entrances2+' AND total_crimes BETWEEEN '+req.query.crimes1+' AND '+req.query.crimes2+' ORDER BY rental_price ASC LIMIT 20', (error, results) => {
+    pool.query('SELECT * FROM final_buildings_set WHERE total_services BETWEEN '+req.query.health_services1+' AND '+ req.query.health_services2+' AND total_collissions BETWEEN '+req.query.vehicle_collission1+' AND '+req.query.vehicle_collission2+' AND total_entrances BETWEEN '+req.query.subway_entrances1+' AND '+req.query.subway_entrances2+' AND total_crimes BETWEEN '+req.query.crimes1+' AND '+req.query.crimes2+' ORDER BY rental_price ASC LIMIT 20', (error, results) => {
       if (error) {
         throw error
       }
