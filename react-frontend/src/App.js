@@ -24,6 +24,7 @@ class App extends React.Component{
     this.fetch_mental_health = this.fetch_mental_health.bind(this)
     this.fetch_subway_entrances = this.fetch_subway_entrances.bind(this)
     this.fetch_detail_placemarks = this.fetch_detail_placemarks.bind(this)
+    this.close = this.close.bind(this);
   }
 
   fetch_detail_placemarks(){
@@ -66,6 +67,16 @@ setSelectedHouse(building){
     renderMHVCSubway: true})
 }
 
+close(){
+  this.setState({
+    renderMHVCSubway : false,
+    mh_placemarks: null,
+    vc_placemarks: null,
+    subway_placemarks: null,
+    selectedHouse: null,
+  })
+}
+
   
 
 
@@ -99,7 +110,7 @@ setSelectedHouse(building){
             selectedHouse = {this.state.selectedHouse}
             
             />
-            {this.state.selectedHouse && <DetailedData getData={this.fetch_detail_placemarks} house={this.state.selectedHouse}></DetailedData>}
+            {this.state.selectedHouse && <DetailedData close={this.close} getData={this.fetch_detail_placemarks} house={this.state.selectedHouse}></DetailedData>}
           </div>
         </div> 
     )

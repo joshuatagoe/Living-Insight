@@ -83,7 +83,7 @@ class Query extends React.Component{
                 <hr></hr>
                 <input onClick={this.toggleQueries} type="submit" value="Query"/>
                 </form>  }
-                {this.state.viewquery && displayhouses}
+                {displayhouses}
                     
             </div>
   
