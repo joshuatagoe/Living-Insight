@@ -82,6 +82,35 @@ const get_subway_entrances = (request, response) => {
     
   }
 
+const search_house_id = ( request, response)=>{
+  search = request.query.search
+  pool.query(`SELECT * FROM  final_buildings_set WHERE house_id=${search}`, (error,results)=>{
+    if(error){
+      throw error
+
+    }
+    response.status(200).json(results.rows)
+
+  })
+
+}
+
+const search_address = ( request, response)=>{
+  search = request.query.search
+  pool.query(`SELECT * FROM  final_buildings_set WHERE address=${search}`, (error,results)=>{
+    if(results.length<0){
+      
+    }
+    if(error){
+      throw error
+
+    }
+    response.status(200).json(results.rows)
+
+  })
+
+}
+
 
 
     
@@ -97,5 +126,7 @@ const get_subway_entrances = (request, response) => {
       get_traffic_incidents,
       get_subway_entrances,
       get_mental_health_service,
+      search_house_id,
+      search_address
   }
 
