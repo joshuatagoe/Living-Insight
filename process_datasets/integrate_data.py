@@ -19,12 +19,16 @@ import sys
 sc = SparkContext("local", "SparkFile App")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/randomdistribution.py")
-address = '310 3rd Ave, New York, NY 10010'
+address = '11 crooke avenue brooklyn new york'
 
 def handle_building(lat, lng, address=address):
+    print(lat)
+    print(lng)
     latlong = computedistance.getLatLong(address)
-    latlong2 = [lat, lng ]
-    return computedistance.computeDistance(latlong,latlong2) < 1.5:
+    latlong2 = [lng, lat ]
+    print(latlong)
+    print(latlong2)
+    if computedistance.computeDistance(latlong,latlong2) < 3:
         return True
     else:   
         return False
@@ -54,21 +58,9 @@ buildings = spark.read \
     
      """
 
-def handle_building(building,_311_service):
-    if _311_service.city in boroughs:
-        if building.borough != _311_service.city:
-            return False
-    latlong = [building.longitude, building.latitude]
-    latlong2 = [_311_service.longitude, _311_service.latitude ]
-    if computedistance.computeDistance(latlong,latlong2) < 1.5:
-        return True
-    else:   
-        return False
-
-
 _building_udf = udf(handle_building,BooleanType())
 
-buildings = buildings.filter(_building_udf('lat','long'))
+buildings = buildings.filter(_building_udf('latitude','longitude'))
 buildings.show()
 
 spark.stop()
