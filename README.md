@@ -7,7 +7,7 @@ The goal of this project is to build a data pipeline that allows homebuyers and 
 
 
 # Table of Contents
-1. ![Motivation](#Motivation)
+1. ![Motivation](#motivation)
 2. ![Pipeline](#Pipeline)
 3. ![Requirements](#Requirements)
 4. ![Architechture](#Architecture)
@@ -15,36 +15,35 @@ The goal of this project is to build a data pipeline that allows homebuyers and 
 6. ![File Structure](#File Structure)
 7. ![Methodology](#Methodology)
 
-
-# Motivation
-
-Placeholder text....
-
-
-# Pipeline
+## Motivation
 
 Placeholder text....
 
 
-# Requirements
-Placeholder text....
-
-
-# Architecture
+## Pipeline
 
 Placeholder text....
 
 
-# Dataset
+## Requirements
+Placeholder text....
+
+
+## Architecture
 
 Placeholder text....
 
 
-# File Structure
+## Dataset
 
 Placeholder text....
 
-# Methodology
+
+## File Structure
+
+Placeholder text....
+
+## Methodology
 
 Placeholder text....
 
