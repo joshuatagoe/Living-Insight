@@ -22,15 +22,21 @@ sqlContext = SQLContext(sc)
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/randomdistribution.py")
 address = '11 crooke avenue brooklyn new york'
+latlng = computedistance.getLatLong(address)
 
-def handle_building(lat, lng, address=address):
-    latlong = computedistance.getLatLong(address)
+def handle_building(lat, lng,latlng=latlng):
     latlong2 = [lng, lat ]
-    if computedistance.computeDistance(latlong,latlong2) < 3:
+    if computedistance.computeDistance(latlng,latlong2) < 3:
         return True
     else:   
         return False
 
+def handle_distance(lat, lng, latlng=latlng):
+    latlong2 = [ lng, lat ]
+    if computedistance.computeDistance(latlng, latlong2) <1.5:
+        return True
+    else:
+        return False
 
 #removes unneccessary columns from dataset and provides an extra column to keep a unique index
 
@@ -58,6 +64,7 @@ buildings = spark.read \
 
 _building_udf = udf(handle_building,BooleanType())
 
+_distance_udf = udf(handle_distance, BooleanType())
 buildings = buildings.filter(_building_udf('latitude','longitude'))
 buildings.show()
 
@@ -77,23 +84,28 @@ id_mh = spark.read \
     .option("password", "postgres") \
     .load()
 
-sqlquery1 = 'WITH upd AS ( SELECT * FROM mh NATURAL JOIN id_mh ) SELECT * FROM upd'
-sqlDF = spark.sql(sqlquery1)
+
+
+buildings.createOrReplaceTempView("building_view")
+mh.createOrReplaceTempView("mental_health")
+id_mh.createOrReplaceTempView("housing_id_mental_health")
+
+
+
+get_query_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN housing_id_mental_health ) SELECT query_id FROM upd'
+sqlDF = spark.sql(get_query_ids)
 sqlDF.show()
-sqlquery = 'WITH upd AS ( SELECT * FROM mh NATURAL JOIN id_mh ) SELECT * FROM upd WHERE house_id IN ('
-
-
-def createquery(row):    
-    print(row)
-    sqlquery = sqlquery+row.house_id+','
-
-buildings.rdd.map(createquery)
-
-sqlquery = sqlquery + ')'
-print(sqlquery)
-sqlDF = spark.sql(sqlquery)
-sqlDF.show()
-
+sqlDF.createOrReplaceTempView("query_identifications")
+test = spark.sql("SELECT * FROM query_identifications")
+test.show()
+get_mh = 'WITH upd AS ( SELECT * FROM mental_health NATURAL JOIN query_identifications) SELECT DISTINCT * FROM upd'
+print("SHould print out mental healths that much previous queries from table above")
+print(get_mh)
+potentialmh = spark.sql(get_mh)
+potentialmh.show()
+print("Should printo out mental_health within 1.5 miles")
+potentialmh.filter(_distance_udf('latitude','longitude'))
+potentialmh.show()
 
 #subway_entrances
 
