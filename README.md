@@ -5,15 +5,15 @@ The goal of this project is to build a data pipeline that allows homebuyers and 
 ![Image of Demo](images/demo1.png)
 ![Image of Demo](images/demo2.png)
 
+# [Table of Contents](#table-of-contents)
+  * [Motivation](#motivation)
+  * [Pipeline](#pipeline)
+  * [Requirements](#requirements)
+  * [Architecture](#architecture)
+  * [Dataset](#dataset)
+  * [File Structure](#file-structure)
+  * [Methodology](#methodology)
 
-# Table of Contents
-1. ![Motivation](#motivation)
-2. ![Pipeline](#Pipeline)
-3. ![Requirements](#Requirements)
-4. ![Architechture](#Architecture)
-5. ![DataSet](#Dataset)
-6. ![File Structure](#File Structure)
-7. ![Methodology](#Methodology)
 
 ## Motivation
 
