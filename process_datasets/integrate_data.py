@@ -14,20 +14,18 @@ from pyspark.sql.functions import udf, struct
 from pyspark.sql.types import BooleanType
 import computedistance
 from pyspark import SparkContext
+from pyspark.sql import SQLContext
 import sys
 
 sc = SparkContext("local", "SparkFile App")
+sqlContext = SQLContext(sc)
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/randomdistribution.py")
 address = '11 crooke avenue brooklyn new york'
 
 def handle_building(lat, lng, address=address):
-    print(lat)
-    print(lng)
     latlong = computedistance.getLatLong(address)
     latlong2 = [lng, lat ]
-    print(latlong)
-    print(latlong2)
     if computedistance.computeDistance(latlong,latlong2) < 3:
         return True
     else:   
@@ -62,5 +60,40 @@ _building_udf = udf(handle_building,BooleanType())
 
 buildings = buildings.filter(_building_udf('latitude','longitude'))
 buildings.show()
+
+#mental_health
+mh = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("dbtable","mental_health") \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+id_mh = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("dbtable","house_id_mental_health") \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+sqlquery = 'WITH upd AS ( SELECT * FROM mh NATURAL JOIN id_mh ) SELECT * FROM upd WHERE house_id IN ('
+
+
+def createquery(row):    
+    print(row)
+    sqlquery = sqlquery+row.house_id+','
+
+buildings.rdd.map(createquery)
+
+sqlquery = sqlquery + ')'
+print(sqlquery)
+sqlDF = spark.sql(sqlquery)
+sqlDF.show()
+
+
+#subway_entrances
+
+#crime
 
 spark.stop()
