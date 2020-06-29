@@ -77,6 +77,9 @@ id_mh = spark.read \
     .option("password", "postgres") \
     .load()
 
+sqlquery1 = 'WITH upd AS ( SELECT * FROM mh NATURAL JOIN id_mh ) SELECT * FROM upd'
+sqlDF = spark.sql(sqlquery1)
+sqlDF.show()
 sqlquery = 'WITH upd AS ( SELECT * FROM mh NATURAL JOIN id_mh ) SELECT * FROM upd WHERE house_id IN ('
 
 
