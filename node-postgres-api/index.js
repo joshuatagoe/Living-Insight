@@ -36,7 +36,7 @@ app.get('/search',(req,res)=>{
 })
 app.get('/search_id',db.search_house_id)
 app.get('/search_address',db.search_address)
-
+app.get('/test',db.test_spark_job)
 
 
 app.listen(port,()=>{
