@@ -1,5 +1,6 @@
 const { query, response } = require('express');
-const exec = require('child_process').exec, child;
+const util = require('util')
+const exec = util.promisify(require('child_process').exec);
 const Pool = require('pg').Pool
 
 const pool= new Pool({
@@ -115,14 +116,14 @@ const search_address = ( request, response)=>{
 
 
 const test_spark_job = async (request, response)=>{
-  const myShellScript = await exec('spark-submit --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.7 --master spark://ec2-52-91-13-65.compute-1.amazonaws.com:7077 --driver-class-path /home/ubuntu/postgresql-42.2.14.jar /home/ubuntu/Housing-Insight/process_datasets/integrate_data.py');
-  myShellScript.stdout.on('data', (data)=>{
-      console.log(data); 
-      // do whatever you want here with data
-  });
-  myShellScript.stderr.on('data', (data)=>{
-      console.error(data);
-  });
+	try {
+		const { stdout, stderr } = await exec('spark-submit --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.7 --master spark://ec2-52-91-13-65.compute-1.amazonaws.com:7077 --driver-class-path /home/ubuntu/postgresql-42.2.14.jar /home/ubuntu/Housing-Insight/process_datasets/integrate_data.py');
+		console.log('stdout:', stdout);
+		console.log('stderr:', stderr);
+		return response.status(200).send(stdout);	
+} catch(e) {
+	console.error(e)
+}
 };
 
 
@@ -143,6 +144,7 @@ const test_spark_job = async (request, response)=>{
       get_subway_entrances,
       get_mental_health_service,
       search_house_id,
-      search_address
+      search_address,
+	test_spark_job
   }
 
