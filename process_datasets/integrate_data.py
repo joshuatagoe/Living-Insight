@@ -10,7 +10,7 @@ Created on Sun Jun 14 06:54:46 2020
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
 import randomdistribution
-from pyspark.sql.functions import udf, struct, asc
+from pyspark.sql.functions import udf, struct, asc, col, lower
 from pyspark.sql.types import BooleanType, IntegerType
 import computedistance
 from pyspark import SparkContext
@@ -74,8 +74,8 @@ buildings = spark.read \
      """
 
 #define custom functions
-_building_udf = udf(handle_building,BooleanType())
-_distance_udf = udf(handle_distance, BooleanType())
+_building_udf = spark.udf.register("_building_udf", handle_building, BooleanType())
+_distance_udf = spark.udf.register("_distance_udf", handle_distance, BooleanType())
 
 #filter for buildings within 3 miles of address
 buildings = buildings.filter(_building_udf('latitude','longitude'))
@@ -186,7 +186,8 @@ crimes.createOrReplaceTempView("crime_data")
 crime_ids.show()
 crimes.show()
 #query string to join house_ids to mental health institution ids
-get_crime_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_crimes ) SELECT * FROM upd'
+get_crime_ids = """WITH upd AS ( SELECT `CMPLNT_NUM` FROM building_to_crimes NATURAL JOIN building_view ) SELECT * FROM upd"""
+print(get_crime_ids)
 sqlDF = spark.sql(get_crime_ids)
 #create view that consists of ids of mental health institutions that pass the criteria
 sqlDF.createOrReplaceTempView("crime_identifications")
@@ -194,30 +195,23 @@ sqlDF.show()
 #query string to select all mental health institutions from mental health dataset that much the query_id
 get_crimes = 'WITH upd AS ( SELECT * FROM crime_data NATURAL JOIN crime_identifications) SELECT DISTINCT * FROM upd'
 potentialcrimes = spark.sql(get_crimes)
-#checks if the chosen mental_health institutions fit the condition
+#checks if the chosen criminal complnts fit the condition
 potentialcrimes.show()
 potentialcrimes.filter(_distance_udf('Latitude','Longitude'))
 potentialcrimes.createOrReplaceTempView("house_crime")
-results = spark.sql("""SELECT "CMPLNT_NUM", '"""+building_id+"""' AS house_id FROM house_crime""")
+results = spark.sql("""SELECT `CMPLNT_NUM`, '"""+building_id+"""' AS house_id FROM house_crime""")
 results.show()
 
 
 #air_quality
-def handle_air(geo_type_name, geo_entity_name, entity_id, building=precinctrow):
-    if geo_type_name == "Borough":
-        if building.borough.lower() == geo_entity_name.lower():
-            return True 
-        else:
-            return False
-    if building.community_district == geo_entity_id:
-        print("worked")
-        return True
-    else:
-        return False
+def handle_air(geo_entity_name):
+     return False
 
-_air_udf = udf(handle_air, BooleanType())
-
-
+air_udf = udf(handle_air, BooleanType())
+spark.udf.register("air_udf",handle_air, BooleanType())
+print(precinctrow)
+data = spark.sql("SHOW USER FUNCTIONS")
+data.show()
 air_quality = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
@@ -244,8 +238,10 @@ sqlDF.createOrReplaceTempView("data_ids")
 #query string to select all mental health institutions from mental health dataset that much the query_id
 get_data = 'WITH upd AS ( SELECT * FROM air_quality NATURAL JOIN data_ids) SELECT DISTINCT * FROM upd'
 potential_datapoints = spark.sql(get_data)
+potential_datapoints.createOrReplaceTempView("house_air")
 #checks if the chosen mental_health institutions fit the condition
-potential_datapoints.filter(_air_udf('geo_type_name','geo_entity_name','geo_entity_id'))
+potential_datapoints = spark.sql('SELECT * FROM house_air WHERE air_udf("geo_entity_name")')
+potential_datapoints.show()
 potential_datapoints.createOrReplaceTempView("house_air")
 results = spark.sql("SELECT indicator_data_id, '"+building_id+"' AS house_id FROM house_air")
 results.show()
