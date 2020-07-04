@@ -26,6 +26,7 @@ app.get('/search',(req,res)=>{
     var query_index = req.originalUrl.indexOf('?');
     var query_string = (query_index>=0)?req.originalUrl.slice(query_index+1):'';
     if(req.query.search_type==='house_id'){
+       
        return res.redirect('/search_id?'+query_string)
     }
     if(req.query.search_type==='address'){
