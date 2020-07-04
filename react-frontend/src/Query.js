@@ -13,9 +13,7 @@ class Query extends React.Component{
             health_services2: 0,
             crimes1 : 0,
             crimes2 : 0,
-            viewquery: false,
-            search_type: 'house_id',
-            search : ""
+            viewquery: false
      }
      this.toggleQueries = this.toggleQueries.bind(this)
      this.handleChange = this.handleChange.bind(this)
@@ -52,19 +50,7 @@ class Query extends React.Component{
         }
         return(
             <div class="sidebar">
-                <form onSubmit={(e)=>{
-                    console.log("testign")
-                    this.props.handleSearch(this.state.search_type,this.state.search)
-                    e.preventDefault();
-                    
-                    }}>
-                <select value={this.state.search_type} onChange={this.handleChange} name='search_type'>
-                    <option value='house_id' label='house_id'/>
-                    <option value='address' label='address'/>       
-                </select>
-                <input class="searchbar" name='search'onChange={this.handleChange} type="text" placeholder="Search..."></input>
-                <button type="submit">Search</button>
-                </form>
+                <input class="searchbar" type="text" placeholder="Search..."></input>
                 <hr></hr>
                 {!this.props.viewquery && <form onSubmit={(e)=>{
                     this.props.handleSubmit(this.state.vehicle_collission1, this.state.vehicle_collission2, this.state.subway_entrances1, this.state.subway_entrances2, this.state.health_services1, this.state.health_services2, this.state.crimes1, this.state.crimes2)

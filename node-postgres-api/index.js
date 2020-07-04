@@ -36,13 +36,12 @@ app.get('/search',(req,res)=>{
     if(req.query.search_type='house_id'){
         res.redirect('/search_id'+query_string)
     }
-    if(req.query.search_type='address'){
+    if(req.qsuery.search_type='address'){
         res.redirect('/search_address'+query_string)
     }
 })
 app.get('/search_id',db.search_house_id)
 app.get('/search_address',db.search_address)
-app.get('/test',test_spark_job)
 
 
 
