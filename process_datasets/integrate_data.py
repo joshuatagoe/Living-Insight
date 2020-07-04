@@ -186,7 +186,7 @@ crimes.createOrReplaceTempView("crime_data")
 crime_ids.show()
 crimes.show()
 #query string to join house_ids to mental health institution ids
-get_crime_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_crimes ) SELECT "CMPLNT_NUM" FROM upd'
+get_crime_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_crimes ) SELECT * FROM upd'
 sqlDF = spark.sql(get_crime_ids)
 #create view that consists of ids of mental health institutions that pass the criteria
 sqlDF.createOrReplaceTempView("crime_identifications")
@@ -200,46 +200,6 @@ potentialcrimes.filter(_distance_udf('Latitude','Longitude'))
 potentialcrimes.createOrReplaceTempView("house_crime")
 results = spark.sql("""SELECT "CMPLNT_NUM", '"""+building_id+"""' AS house_id FROM house_crime""")
 results.show()
-
-
-#collissions
-
-
-vehicle_collissions = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","vehicle_collissions") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-collissions = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","building_to_collissions") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-collissions.createOrReplaceTempView("building_to_collissions")
-vehicle_collissions.createOrReplaceTempView("vehicle_collissions")
-#query string to join house_ids to vehicle_collissions institution ids
-get_collission_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_collissions ) SELECT collision_id FROM upd'
-sqlDF = spark.sql(get_collission_ids)
-#create view that consists of ids of mental health institutions that pass the criteria
-sqlDF.createOrReplaceTempView("collission_ids")
-#query string to select all collissions that match the query_id
-get_col = 'WITH upd AS ( SELECT * FROM vehicle_collissions NATURAL JOIN collission_ids) SELECT DISTINCT * FROM upd'
-potentialcol = spark.sql(get_col)
-#checks if the chosen vehicle_collissions fit the condition
-potentialcol.filter(_distance_udf('lat','long'))
-potentialcol.createOrReplaceTempView("house_collission")
-results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
-results.show()
-
-
-
-
 
 
 #air_quality
@@ -288,6 +248,50 @@ potential_datapoints = spark.sql(get_data)
 potential_datapoints.filter(_air_udf('geo_type_name','geo_entity_name','geo_entity_id'))
 potential_datapoints.createOrReplaceTempView("house_air")
 results = spark.sql("SELECT indicator_data_id, '"+building_id+"' AS house_id FROM house_air")
+results.show()
+
+
+#collissions
+
+vehicle_collissions = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("dbtable","vehicle_collissions") \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+collissions = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("dbtable","building_to_collissions") \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+
+vehicle_collissions.cache()
+collissions.cache()
+
+total_num1 = vehicle_collissions.count()
+total_num2 = collissions.count()
+print(total_num1)
+print(total_num2)
+
+collissions.createOrReplaceTempView("building_to_collissions")
+vehicle_collissions.createOrReplaceTempView("vehicle_collissions")
+#query string to join house_ids to vehicle_collissions institution ids
+get_collission_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_collissions ) SELECT collision_id FROM upd'
+sqlDF = spark.sql(get_collission_ids)
+#create view that consists of ids of mental health institutions that pass the criteria
+sqlDF.createOrReplaceTempView("collission_ids")
+#query string to select all collissions that match the query_id
+get_col = 'WITH upd AS ( SELECT * FROM vehicle_collissions NATURAL JOIN collission_ids) SELECT DISTINCT * FROM upd'
+potentialcol = spark.sql(get_col)
+#checks if the chosen vehicle_collissions fit the condition
+potentialcol.filter(_distance_udf('lat','long'))
+potentialcol.createOrReplaceTempView("house_collission")
+results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
 results.show()
 
 
