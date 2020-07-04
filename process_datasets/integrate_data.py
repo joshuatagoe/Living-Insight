@@ -10,7 +10,7 @@ Created on Sun Jun 14 06:54:46 2020
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
 import randomdistribution
-from pyspark.sql.functions import udf, struct
+from pyspark.sql.functions import udf, struct, asc
 from pyspark.sql.types import BooleanType, IntegerType
 import computedistance
 from pyspark import SparkContext
@@ -41,7 +41,7 @@ def handle_distance(lat, lng, latlng=latlng):
         return False
 
 def find_building_distance(row,latlng=latlng):
-    latlong2 = [row['latitude'], row['longitude'] ]
+    latlong2 = [row['longitude'], row['latitude'] ]
     dist = computedistance.computeDistance(latlng,latlong2)
     newrow = row.asDict()
     newrow["distance"] = dist
@@ -60,7 +60,7 @@ spark = SparkSession \
 buildings = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","buildings") \
+    .option("dbtable","final_buildings_set") \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
@@ -79,15 +79,17 @@ _distance_udf = udf(handle_distance, BooleanType())
 
 #filter for buildings within 3 miles of address
 buildings = buildings.filter(_building_udf('latitude','longitude'))
-
+buildings.show()
 #precinct and community district
 buildings_rdd = buildings.rdd.map(find_building_distance)
 buildings = buildings_rdd.toDF()
 buildings.show()
-precinctrow = buildins.orderBy(asc("distance")).take(1)
+precinctrow = buildings.orderBy(asc("distance")).take(1)
 buildings.orderBy(asc("distance")).limit(1).first()
-print(precinctrow["precinct"])
-
+print("Precinct is")
+print()
+print(precinctrow[0].precinct)
+precinctrow = precinctrow[0]
 
 #mental_health
 mh = spark.read \
@@ -150,41 +152,7 @@ subway_entrances.createOrReplaceTempView("subway_entrances")
 #query string to join house_ids to mental health institution ids
 get_object_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_subway ) SELECT object_id FROM upd'
 sqlDF = spark.sql(get_object_ids)
-#create view that consists of ids of mental health institutions that pass the criteria
-sqlDF.createOrReplaceTempView("subway_identifications")
-#query string to select all mental health institutions from mental health dataset that much the query_id
-get_sub = 'WITH upd AS ( SELECT * FROM subway_entrances NATURAL JOIN subway_identifications) SELECT DISTINCT * FROM upd'
-potentialsub = spark.sql(get_mh)
-#checks if the chosen mental_health institutions fit the condition
-potentialsub.filter(_distance_udf('lat','long'))
-potentialsub.createOrReplaceTempView("house_sub")
-results = spark.sql("SELECT object_id, '"+building_id+"' AS house_id FROM house_sub")
-results.show()
-
-#crime
-
-subway_entrances = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","subway_entrances") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-subway = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","building_to_subway") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-subway.createOrReplaceTempView("building_to_subway")
-subway_entrances.createOrReplaceTempView("subway_entrances")
-#query string to join house_ids to mental health institution ids
-get_object_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_subway ) SELECT object_id FROM upd'
-sqlDF = spark.sql(get_object_ids)
-#create view that consists of ids of mental health institutions that pass the criteria
+#create view that consists of ids of subway_entrances institutions that pass the criteria
 sqlDF.createOrReplaceTempView("subway_identifications")
 #query string to select all mental health institutions from mental health dataset that much the query_id
 get_sub = 'WITH upd AS ( SELECT * FROM subway_entrances NATURAL JOIN subway_identifications) SELECT DISTINCT * FROM upd'
@@ -193,6 +161,44 @@ potentialsub = spark.sql(get_sub)
 potentialsub.filter(_distance_udf('lat','long'))
 potentialsub.createOrReplaceTempView("house_sub")
 results = spark.sql("SELECT object_id, '"+building_id+"' AS house_id FROM house_sub")
+results.show()
+
+#crime
+
+crimes = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("dbtable","nypd_crime_data") \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+crime_ids = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("dbtable","building_id_to_crime_id") \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+crime_ids.createOrReplaceTempView("building_to_crimes")
+crimes.createOrReplaceTempView("crime_data")
+crime_ids.show()
+crimes.show()
+#query string to join house_ids to mental health institution ids
+get_crime_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_crimes ) SELECT "CMPLNT_NUM" FROM upd'
+sqlDF = spark.sql(get_crime_ids)
+#create view that consists of ids of mental health institutions that pass the criteria
+sqlDF.createOrReplaceTempView("crime_identifications")
+sqlDF.show()
+#query string to select all mental health institutions from mental health dataset that much the query_id
+get_crimes = 'WITH upd AS ( SELECT * FROM crime_data NATURAL JOIN crime_identifications) SELECT DISTINCT * FROM upd'
+potentialcrimes = spark.sql(get_crimes)
+#checks if the chosen mental_health institutions fit the condition
+potentialcrimes.show()
+potentialcrimes.filter(_distance_udf('Latitude','Longitude'))
+potentialcrimes.createOrReplaceTempView("house_crime")
+results = spark.sql("""SELECT "CMPLNT_NUM", '"""+building_id+"""' AS house_id FROM house_crime""")
 results.show()
 
 
