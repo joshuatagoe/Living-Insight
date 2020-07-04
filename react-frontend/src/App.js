@@ -24,6 +24,7 @@ class App extends React.Component{
     this.fetch_mental_health = this.fetch_mental_health.bind(this)
     this.fetch_subway_entrances = this.fetch_subway_entrances.bind(this)
     this.fetch_detail_placemarks = this.fetch_detail_placemarks.bind(this)
+    this.handleSearch= this.handleSearch.bind(this)
     this.close = this.close.bind(this);
   }
 
@@ -81,19 +82,31 @@ close(){
 
 
   handleSubmit(vehicle_collission1, vehicle_collission2, subway_entrances1, subway_entrances2, health_services1, health_services2, crimes1, crimes2){
-    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/getbuildings?vehicle_collission1=${vehicle_collission1}&subway_entrances1=${subway_entrances1}&health_services1=${health_services1}&vehicle_collission2=${vehicle_collission2}&subway_entrances2=${subway_entrances2}&health_services2=${health_services2}&crimes1=${crimes1}&crimes2=${crimes2}`
+    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/getbuildings?vehicle_collission1=${vehicle_collission1}&subway_entrances1=${subway_entrances1}&health_services1=${health_services1}&vehicle_collission2=${vehicle_collission2}&subway_entrances2=${subway_entrances2}&health_services2=${health_services2}&crimes1=${crimes1}&crimes2=${crimes2}`;
     fetch(url)
         .then( res=> res.json())
         .then(res=> this.setState({response: res}))
         .catch(err=>err);
 }
 
+handleSearch(search_type, search){
+  console.log("test")
+  console.log(search)
+  console.log(search_type)
+  let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/search?search_type=${search_type}&search='${search}'`;
+  fetch(url)
+      .then( res=> res.json())
+      .then(res=> this.setState({response: res}))
+      .catch(err=>err);
+}
+
+
 
   render(){
     const WrappedMap = withScriptjs(withGoogleMap(Map));
     return(
 
-        <div>{!this.state.selectedHouse && <Query setSelectedHouse={this.setSelectedHouse} response={this.state.response} handleChange={this.handleChange} handleSubmit={this.handleSubmit} />}<div style={{ width: "100vw", height: "100vh"}}>
+        <div>{!this.state.selectedHouse && <Query handleSearch={this.handleSearch} setSelectedHouse={this.setSelectedHouse} response={this.state.response} handleChange={this.handleChange} handleSubmit={this.handleSubmit} />}<div style={{ width: "100vw", height: "100vh"}}>
             <WrappedMap 
             googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${
               process.env.REACT_APP_GOOGLE_KEY

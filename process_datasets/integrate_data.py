@@ -16,6 +16,7 @@ import computedistance
 from pyspark import SparkContext
 from pyspark.sql import SQLContext
 import sys
+import uuid 
 
 sc = SparkContext("local", "SparkFile App")
 sqlContext = SQLContext(sc)
@@ -96,9 +97,7 @@ get_query_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN housing_
 sqlDF = spark.sql(get_query_ids)
 sqlDF.show()
 sqlDF.createOrReplaceTempView("query_identifications")
-test = spark.sql("SELECT * FROM query_identifications")
-test.show()
-get_mh = 'WITH upd AS ( SELECT * FROM mental_health NATURAL JOIN query_identifications) SELECT DISTINCT * FROM upd'
+get_mh = 'WITH upd AS ( SELECT * FROM mental_health NATURAL JOIN query_identifications) SELECT DISTINCT query_id FROM upd'
 print("SHould print out mental healths that much previous queries from table above")
 print(get_mh)
 potentialmh = spark.sql(get_mh)
@@ -106,6 +105,12 @@ potentialmh.show()
 print("Should printo out mental_health within 1.5 miles")
 potentialmh.filter(_distance_udf('latitude','longitude'))
 potentialmh.show()
+print("Should print out queries with house_id")
+building_id = uuid.uuid1()
+building_id = building_id.hex
+results = spark.sql("SELECT *, "+building_id" AS house_id FROM query_identifications")
+results.show()
+
 
 #subway_entrances
 
