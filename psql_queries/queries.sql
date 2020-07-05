@@ -50,3 +50,8 @@ CREATE TABLE collissions_aggregate_data AS SELECT avg(total_collissions) AS mean
 
 /* create new table that JOINs all tables to main buildings table */
 CREATE TABLE final_buildings_set AS SELECT * FROM buildings_with_kml NATURAL JOIN  num_services NATURAL JOIN mh_aggregate_data NATURAL JOIN num_subway NATURAL JOIN num_collissions NATURAL JOIN num_felonies NATURAL JOIN num_misdemeanors NATURAL JOIN num_violations NATURAL JOIN num_crimes;
+
+
+/* changes to data */
+DELETE FROM vehicle_collissions WHERE collision_id IS NULL;
+DELETE FROM building_to_collissions WHERE collision_id IS NULL;

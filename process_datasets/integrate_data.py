@@ -97,40 +97,38 @@ precinctrow = precinctrow[0]
 #mental_health
 house_ids = [ row.house_id for row in buildings.collect()]
 id_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
+query_string = 'SELECT query_id FROM house_id_mental_health WHERE house_id IN '+id_string+' GROUP BY query_id'
+
+
+id_mh = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+id_mh.show()
+query_ids = [ row.query_id for row in id_mh.collect()]
+data_string = ('('+','.join("'"+str(x)+"'" for x in query_ids)+')')
+query_string = 'SELECT * FROM mental_health WHERE query_id IN '+data_string
+print(query_string)
+
+
 
 
 mh = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","mental_health") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-id_mh = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","house_id_mental_health") \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
 
 
-#creates view for buildling, mental health, and link of house_id to mentalhealth_ids
-buildings.createOrReplaceTempView("building_view")
-mh.createOrReplaceTempView("mental_health")
-id_mh.createOrReplaceTempView("housing_id_mental_health")
-#query string to join house_ids to mental health institution ids
-get_query_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN housing_id_mental_health ) SELECT query_id FROM upd'
-sqlDF = spark.sql(get_query_ids)
-#create view that consists of ids of mental health institutions that pass the criteria
-sqlDF.createOrReplaceTempView("query_identifications")
-#query string to select all mental health institutions from mental health dataset that much the query_id
-get_mh = 'WITH upd AS ( SELECT * FROM mental_health NATURAL JOIN query_identifications) SELECT DISTINCT * FROM upd'
-potentialmh = spark.sql(get_mh)
 #create view from potentialmh 
-potentialmh.createOrReplaceTempView("house_mh")
+mh.createOrReplaceTempView("house_mh")
 #checks if the chosen mental_health institutions fit the condition
-potentialmh.filter(_distance_udf('latitude','longitude'))
 potentialmh = spark.sql('SELECT * FROM house_mh WHERE _distance_udf(latitude,longitude)')
 potentialmh.createOrReplaceTempView("house_mh")
 #creates house_id for house being added
@@ -140,35 +138,41 @@ building_id = building_id.hex
 results = spark.sql("SELECT query_id, '"+building_id+"' AS house_id FROM house_mh")
 results.show()
 print(building_id)
+
+
 #subway_entrances
-subway_entrances = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","subway_entrances") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
+query_string = 'SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id'
+print(query_string)
 
 subway = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","building_to_subway") \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
 
-subway.createOrReplaceTempView("building_to_subway")
-subway_entrances.createOrReplaceTempView("subway_entrances")
-#query string to join house_ids to mental health institution ids
-get_object_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_subway ) SELECT object_id FROM upd'
-sqlDF = spark.sql(get_object_ids)
-#create view that consists of ids of subway_entrances institutions that pass the criteria
-sqlDF.createOrReplaceTempView("subway_identifications")
-#query string to select all mental health institutions from mental health dataset that much the query_id
-get_sub = 'WITH upd AS ( SELECT * FROM subway_entrances NATURAL JOIN subway_identifications) SELECT DISTINCT * FROM upd'
-potentialsub = spark.sql(get_sub)
+
+subway.show()
+object_ids = [ row.object_id for row in subway.collect()]
+data_string = ('('+','.join("'"+str(x)+"'" for x in object_ids)+')')
+query_string = 'SELECT * FROM subway_entrances WHERE object_id IN '+data_string
+print(query_string)
+
+
+
+
+subway_entrances = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+
 #checks if the chosen mental_health institutions fit the condition
-potentialsub.createOrReplaceTempView("house_sub")
+subway_entrances.createOrReplaceTempView("house_sub")
 potentialsub = spark.sql('SELECT * FROM house_sub WHERE _distance_udf(lat,long)')
 potentialsub.createOrReplaceTempView("house_sub")
 results = spark.sql("SELECT object_id, '"+building_id+"' AS house_id FROM house_sub")
@@ -176,39 +180,38 @@ results.show()
 
 #crime
 
-crimes = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","nypd_crime_data") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
+
+query_string = 'SELECT `CMPLNT_NUM` FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY `CMPLNT_NUM`'
+print(query_string)
+
 
 crime_ids = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","building_id_to_crime_id") \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
 
-crime_ids.createOrReplaceTempView("building_to_crimes")
-crimes.createOrReplaceTempView("crime_data")
 crime_ids.show()
-crimes.show()
-#query string to join house_ids to mental health institution ids
-get_crime_ids = """WITH upd AS ( SELECT `CMPLNT_NUM` FROM building_to_crimes NATURAL JOIN building_view ) SELECT * FROM upd"""
-print(get_crime_ids)
-sqlDF = spark.sql(get_crime_ids)
-#create view that consists of ids of mental health institutions that pass the criteria
-sqlDF.createOrReplaceTempView("crime_identifications")
-sqlDF.show()
-#query string to select all mental health institutions from mental health dataset that much the query_id
-get_crimes = 'WITH upd AS ( SELECT * FROM crime_data NATURAL JOIN crime_identifications) SELECT DISTINCT * FROM upd'
-potentialcrimes = spark.sql(get_crimes)
-#checks if the chosen criminal complnts fit the condition
-potentialcrimes.show()
-potentialcrimes.createOrReplaceTempView("house_crime")
+cmplnt_ids = [ row.CMPLNT_NUM for row in crime_ids.collect()]
+data_string = ('('+','.join("'"+str(x)+"'" for x in cmplnt_ids)+')')
+query_string = 'SELECT * FROM nypd_crime_data WHERE `CMPLNT_NUM` IN '+data_string
+print(query_string)
+
+
+
+crimes = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+
+
+crimes.createOrReplaceTempView("house_crime")
 potentialcrimes = spark.sql('SELECT * FROM house_crime WHERE _distance_udf(Latitude,Longitude)')
 potentialcrimes.createOrReplaceTempView("house_crime")
 results = spark.sql("""SELECT `CMPLNT_NUM`, '"""+building_id+"""' AS house_id FROM house_crime""")
@@ -229,33 +232,34 @@ spark.udf.register("air_udf",handle_air, BooleanType())
 print(precinctrow)
 data = spark.sql("SHOW USER FUNCTIONS")
 data.show()
-air_quality = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","air_quality") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
+
+query_string = 'SELECT indicator_data_id FROM building_to_air_quality WHERE house_id IN '+id_string+' GROUP BY indicator_data_id'
+print(query_string)
 
 building_air = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","building_to_air_quality") \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
 
-building_air.createOrReplaceTempView("building_to_air_quality")
-air_quality.createOrReplaceTempView("air_quality")
-#query string to join house_ids to mental health institution ids
-get_data_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_air_quality ) SELECT indicator_data_id FROM upd'
-sqlDF = spark.sql(get_data_ids)
-#create view that consists of ids of mental health institutions that pass the criteria
-sqlDF.createOrReplaceTempView("data_ids")
-#query string to select all mental health institutions from mental health dataset that much the query_id
-get_data = 'WITH upd AS ( SELECT * FROM air_quality NATURAL JOIN data_ids) SELECT DISTINCT * FROM upd'
-potential_datapoints = spark.sql(get_data)
-potential_datapoints.createOrReplaceTempView("house_air")
+building_air.show()
+data_ids = [ row.indicator_data_id for row in building_air.collect()]
+data_string = ('('+','.join("'"+str(x)+"'" for x in data_ids)+')')
+query_string = 'SELECT * FROM air_quality WHERE indicator_data_id IN '+data_string
+print(query_string)
+
+air_quality = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+
+air_quality.createOrReplaceTempView("house_air")
 #checks if the chosen mental_health institutions fit the condition
 potential_datapoints = spark.sql('SELECT * FROM house_air WHERE air_udf(geo_entity_name,geo_entity_id)')
 potential_datapoints.show()
@@ -299,6 +303,9 @@ potentialcol.createOrReplaceTempView("house_collission")
 potentialcol.show()
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
 results.show()
+
+#results.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", properties = { "user" : "postgres", "password" : "postgres" } )
+
 
 
 spark.stop()
