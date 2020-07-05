@@ -10,7 +10,7 @@ Created on Sun Jun 14 06:54:46 2020
 from pyspark.sql import SparkSession
 from pyspark.sql import Row
 import randomdistribution
-from pyspark.sql.functions import udf, struct, asc, col, lower
+from pyspark.sql.functions import udf, struct, asc, col, lower, count, when, sum
 from pyspark.sql.types import BooleanType, IntegerType
 import computedistance
 from pyspark import SparkContext
@@ -212,9 +212,9 @@ results = spark.sql("""SELECT `CMPLNT_NUM`, '"""+building_id+"""' AS house_id FR
 results.show()
 
 #Update new building row
-total_felonies = results.map(x=>count(when($"FELONY"===x['LAW_CAT_CD'],1)))
-total_violations = results.map(x=>count(when($"VIOLATION"===x['LAW_CAT_CD'],1)))
-total_misdemeanors = results.map(x=>count(when($"MISDEMEANOR"===x['LAW_CAT_CD'],1)))
+total_felonies = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='FELONY').count()
+total_violations = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='VIOLATION').count()
+total_misdemeanors = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='MISDEMEANOR').count()
 print(total_felonies)
 print(total_misdemeanors)
 print(total_violations)
@@ -229,7 +229,6 @@ def handle_air(geo_entity_name,geo_entity_id, building=precinctrow):
     if building.borough.lower() == geo_entity_name.lower():
         return True 
     if building.community_district == geo_entity_id:
-        print("worked")
         return True
     return False
 
@@ -299,11 +298,11 @@ results.show()
 
 #update new building row
 newbuilding['total_collissions'] = results.count()
-newbuilding['total_injured'] = 0
-total_injured = results.rdd.map(lambda x: [(1,x[4]),(2,x[5])]).reduceByKey(lambda a,b: a+b).collect()[0][1]
-print(total_injured)
-newbuilding['total_killed'] = 0
-newbuilding['total_affected'] = 0
+calculated_info = potentialcol.agg(sum("num_injured"),sum("num_killed")).collect()[0]
+print(calculated_info)
+newbuilding['total_injured'] = calculated_info[0]
+newbuilding['total_killed'] = calculated_info[1]
+newbuilding['total_affected'] = calculated_info[0]+calculated_info[1]
 
 
 
