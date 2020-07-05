@@ -89,6 +89,11 @@ buildings = buildings_rdd.toDF()
 precinctrow = buildings.orderBy(asc("distance")).take(1)
 buildings.orderBy(asc("distance")).limit(1).first()
 precinctrow = precinctrow[0]
+newbuilding = precinctrow.asDict()
+newbuilding['latitude'] =latlng[1]
+newbuilding['longitude'] = latlng[0]
+newbuilding['address'] = address
+newbuilding['rental_price'] = 0
 
 #mental_health
 house_ids = [ row.house_id for row in buildings.collect()]
@@ -129,6 +134,10 @@ building_id = building_id.hex
 results = spark.sql("SELECT query_id, '"+building_id+"' AS house_id FROM house_mh")
 results.show()
 
+#update new building row
+newbuilding['house_id'] = building_id
+newbuilding['total_services'] = results.count()
+
 #subway_entrances
 query_string = 'SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id'
 
@@ -164,11 +173,13 @@ potentialsub.createOrReplaceTempView("house_sub")
 results = spark.sql("SELECT object_id, '"+building_id+"' AS house_id FROM house_sub")
 results.show()
 
+#update new building row
+newbuilding['total_entrances'] = results.count()
+
+
+
 #crime
-
-
 query_string = 'SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM"'
-
 
 crime_ids = spark.read \
     .format("jdbc") \
@@ -199,6 +210,18 @@ potentialcrimes = spark.sql('SELECT * FROM house_crime WHERE _distance_udf(Latit
 potentialcrimes.createOrReplaceTempView("house_crime")
 results = spark.sql("""SELECT `CMPLNT_NUM`, '"""+building_id+"""' AS house_id FROM house_crime""")
 results.show()
+
+#Update new building row
+total_felonies = results.map(x=>count(when($"FELONY"===x['LAW_CAT_CD'],1)))
+total_violations = results.map(x=>count(when($"VIOLATION"===x['LAW_CAT_CD'],1)))
+total_misdemeanors = results.map(x=>count(when($"MISDEMEANOR"===x['LAW_CAT_CD'],1)))
+print(total_felonies)
+print(total_misdemeanors)
+print(total_violations)
+newbuilding['total_felonies'] = total_felonies
+newbuilding['total_misdemeanors'] = total_misdemeanors
+newbuilding['total_violations'] = total_violations
+newbuilding['total_crimes'] = total_felonies+total_violations+total_misdemeanors
 
 
 #air_quality
@@ -245,9 +268,6 @@ results.show()
 
 
 #collissions
-
-
-
 query_string = 'SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id'
 
 collissions = spark.read \
@@ -277,6 +297,21 @@ potentialcol.createOrReplaceTempView("house_collission")
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
 results.show()
 
+#update new building row
+newbuilding['total_collissions'] = results.count()
+newbuilding['total_injured'] = 0
+total_injured = results.rdd.map(lambda x: [(1,x[4]),(2,x[5])]).reduceByKey(lambda a,b: a+b).collect()[0][1]
+print(total_injured)
+newbuilding['total_killed'] = 0
+newbuilding['total_affected'] = 0
+
+
+
+
+
+
+newbuilding = Row(**newbuilding)
+print(newbuilding)
 #results.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", properties = { "user" : "postgres", "password" : "postgres" } )
 
 
