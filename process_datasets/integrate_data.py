@@ -35,6 +35,7 @@ def handle_building(lat, lng,latlng=latlng):
 
 def handle_distance(lat, lng, latlng=latlng):
     latlong2 = [ lng, lat ]
+    print(latlong2)
     if computedistance.computeDistance(latlng, latlong2) <1.5:
         return True
     else:
@@ -127,7 +128,7 @@ potentialmh = spark.sql(get_mh)
 potentialmh.createOrReplaceTempView("house_mh")
 #checks if the chosen mental_health institutions fit the condition
 potentialmh.filter(_distance_udf('latitude','longitude'))
-potentialmh = spark.sql('SELECT * FROM house_mh WHERE _distance_udf("latitude","longitude")')
+potentialmh = spark.sql('SELECT * FROM house_mh WHERE _distance_udf(latitude,longitude)')
 potentialmh.createOrReplaceTempView("house_mh")
 #creates house_id for house being added
 building_id = uuid.uuid1()
@@ -165,7 +166,7 @@ get_sub = 'WITH upd AS ( SELECT * FROM subway_entrances NATURAL JOIN subway_iden
 potentialsub = spark.sql(get_sub)
 #checks if the chosen mental_health institutions fit the condition
 potentialsub.createOrReplaceTempView("house_sub")
-potentialsub = spark.sql('SELECT * FROM house_sub WHERE _distance_udf("lat","long")')
+potentialsub = spark.sql('SELECT * FROM house_sub WHERE _distance_udf(lat,long)')
 potentialsub.createOrReplaceTempView("house_sub")
 results = spark.sql("SELECT object_id, '"+building_id+"' AS house_id FROM house_sub")
 results.show()
@@ -205,7 +206,7 @@ potentialcrimes = spark.sql(get_crimes)
 #checks if the chosen criminal complnts fit the condition
 potentialcrimes.show()
 potentialcrimes.createOrReplaceTempView("house_crime")
-potentialcrimes = spark.sql('SELECT * FROM house_crime WHERE _distance_udf("Latitude","Longitude")')
+potentialcrimes = spark.sql('SELECT * FROM house_crime WHERE _distance_udf(Latitude,Longitude)')
 potentialcrimes.createOrReplaceTempView("house_crime")
 results = spark.sql("""SELECT `CMPLNT_NUM`, '"""+building_id+"""' AS house_id FROM house_crime""")
 results.show()
@@ -253,7 +254,7 @@ get_data = 'WITH upd AS ( SELECT * FROM air_quality NATURAL JOIN data_ids) SELEC
 potential_datapoints = spark.sql(get_data)
 potential_datapoints.createOrReplaceTempView("house_air")
 #checks if the chosen mental_health institutions fit the condition
-potential_datapoints = spark.sql('SELECT * FROM house_air WHERE air_udf("geo_entity_name","geo_entity_id")')
+potential_datapoints = spark.sql('SELECT * FROM house_air WHERE air_udf(geo_entity_name,geo_entity_id)')
 potential_datapoints.show()
 potential_datapoints.createOrReplaceTempView("house_air")
 results = spark.sql("SELECT indicator_data_id, '"+building_id+"' AS house_id FROM house_air")
@@ -299,7 +300,7 @@ get_col = 'WITH upd AS ( SELECT * FROM vehicle_collissions NATURAL JOIN collissi
 potentialcol = spark.sql(get_col)
 #checks if the chosen vehicle_collissions fit the condition
 potentialcol.createOrReplaceTempView("house_collission")
-potentialcol = spark.sql('SELECT * FROM house_collission WHERE _distance_udf("lat","long")')
+potentialcol = spark.sql('SELECT * FROM house_collission WHERE _distance_udf(lat,long)')
 potentialcol.createOrReplaceTempView("house_collission")
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
 results.show()
