@@ -15,6 +15,7 @@ from pyspark.sql.types import BooleanType, IntegerType
 import computedistance
 from pyspark import SparkContext
 from pyspark.sql import SQLContext
+import org.apache.spark.sql.SaveMode
 import sys
 import uuid 
 
@@ -24,7 +25,7 @@ sqlContext = SQLContext(sc)
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/randomdistribution.py")
 address = '11 crooke avenue brooklyn new york'
-if(len(sys.argv)>0):
+if(len(sys.argv)>1):
     address = sys.argv[1].lower()
 print("This is the address")
 print(address)
@@ -132,7 +133,7 @@ building_id = uuid.uuid1()
 building_id = building_id.hex
 #slect queries from mhs, pairing it with the house_id
 results = spark.sql("SELECT query_id, '"+building_id+"' AS house_id FROM house_mh")
-results.show()
+results.write.mode(SaveMode.Append).jdbc("jdbc:postgresql://localhost:5432/living_insight", table="house_id_mental_health", properties = { "user" : "postgres", "password" : "postgres" } )
 
 #update new building row
 newbuilding['house_id'] = building_id
@@ -171,7 +172,8 @@ subway_entrances.createOrReplaceTempView("house_sub")
 potentialsub = spark.sql('SELECT * FROM house_sub WHERE _distance_udf(lat,long)')
 potentialsub.createOrReplaceTempView("house_sub")
 results = spark.sql("SELECT object_id, '"+building_id+"' AS house_id FROM house_sub")
-results.show()
+results.write.mode(SaveMode.Append).jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_subway", properties = { "user" : "postgres", "password" : "postgres" } )
+
 
 #update new building row
 newbuilding['total_entrances'] = results.count()
@@ -209,7 +211,8 @@ crimes.createOrReplaceTempView("house_crime")
 potentialcrimes = spark.sql('SELECT * FROM house_crime WHERE _distance_udf(Latitude,Longitude)')
 potentialcrimes.createOrReplaceTempView("house_crime")
 results = spark.sql("""SELECT `CMPLNT_NUM`, '"""+building_id+"""' AS house_id FROM house_crime""")
-results.show()
+results.write.mode(SaveMode.Append).jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_id_to_crime_id", properties = { "user" : "postgres", "password" : "postgres" } )
+
 
 #Update new building row
 total_felonies = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='FELONY').count()
@@ -263,7 +266,7 @@ air_quality.createOrReplaceTempView("house_air")
 potential_datapoints = spark.sql('SELECT * FROM house_air WHERE air_udf(geo_entity_name,geo_entity_id)')
 potential_datapoints.createOrReplaceTempView("house_air")
 results = spark.sql("SELECT indicator_data_id, '"+building_id+"' AS house_id FROM house_air")
-results.show()
+results.write.mode(SaveMode.Append).jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_air_quality", properties = { "user" : "postgres", "password" : "postgres" } )
 
 
 #collissions
@@ -294,12 +297,10 @@ vehicle_collissions.createOrReplaceTempView("house_collission")
 potentialcol = spark.sql('SELECT * FROM house_collission WHERE _distance_udf(lat,long)')
 potentialcol.createOrReplaceTempView("house_collission")
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
-results.show()
-
+results.write.mode(SaveMode.Append).jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collission", properties = { "user" : "postgres", "password" : "postgres" } )
 #update new building row
 newbuilding['total_collissions'] = results.count()
 calculated_info = potentialcol.agg(sum("num_injured"),sum("num_killed")).collect()[0]
-print(calculated_info)
 newbuilding['total_injured'] = calculated_info[0]
 newbuilding['total_killed'] = calculated_info[1]
 newbuilding['total_affected'] = calculated_info[0]+calculated_info[1]
@@ -310,9 +311,10 @@ newbuilding['total_affected'] = calculated_info[0]+calculated_info[1]
 
 
 newbuilding = Row(**newbuilding)
-print(newbuilding)
-#results.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", properties = { "user" : "postgres", "password" : "postgres" } )
-
+rdd = sc.parallelize([newbuilding])
+df = rdd.toDF()
+df.write.mode(SaveMode.Append).jdbc("jdbc:postgresql://localhost:5432/living_insight", table="air_quality", properties = { "user" : "postgres", "password" : "postgres" } )
+print(building_id)
 
 
 spark.stop()
