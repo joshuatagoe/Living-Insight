@@ -35,7 +35,6 @@ def handle_building(lat, lng,latlng=latlng):
 
 def handle_distance(lat, lng, latlng=latlng):
     latlong2 = [ lng, lat ]
-    print(latlong2)
     if computedistance.computeDistance(latlng, latlong2) <1.5:
         return True
     else:
@@ -269,7 +268,7 @@ results.show()
 
 
 
-query_string = 'SELECT * FROM building_to_collissions WHERE house_id IN '+id_string
+query_string = 'SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id'
 print(query_string)
 collissions = spark.read \
     .format("jdbc") \
@@ -279,8 +278,9 @@ collissions = spark.read \
     .option("password", "postgres") \
     .load()
 
+collissions.show()
 collission_ids = [ row.collision_id for row in collissions.collect()]
-collission_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
+collission_string = ('('+','.join("'"+str(x)+"'" for x in collission_ids)+')')
 query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN '+collission_string
 print(query_string)
 
@@ -292,26 +292,11 @@ vehicle_collissions = spark.read \
     .option("password", "postgres") \
     .load()
 
-
-total_num1 = vehicle_collissions.count()
-total_num2 = collissions.count()
-print(total_num1)
-print(total_num2)
-
-collissions.createOrReplaceTempView("building_to_collissions")
-vehicle_collissions.createOrReplaceTempView("vehicle_collissions")
-#query string to join house_ids to vehicle_collissions institution ids
-get_collission_ids = 'WITH upd AS ( SELECT * FROM building_view NATURAL JOIN building_to_collissions ) SELECT collision_id FROM upd'
-sqlDF = spark.sql(get_collission_ids)
-#create view that consists of ids of mental health institutions that pass the criteria
-sqlDF.createOrReplaceTempView("collission_ids")
-#query string to select all collissions that match the query_id
-get_col = 'WITH upd AS ( SELECT * FROM vehicle_collissions NATURAL JOIN collission_ids) SELECT DISTINCT * FROM upd'
-potentialcol = spark.sql(get_col)
 #checks if the chosen vehicle_collissions fit the condition
-potentialcol.createOrReplaceTempView("house_collission")
+vehicle_collissions.createOrReplaceTempView("house_collission")
 potentialcol = spark.sql('SELECT * FROM house_collission WHERE _distance_udf(lat,long)')
 potentialcol.createOrReplaceTempView("house_collission")
+potentialcol.show()
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
 results.show()
 
