@@ -117,7 +117,7 @@ const search_address = ( request, response)=>{
 
 const test_spark_job = async (request, response)=>{
 	try {
-		const { stdout, stderr } = await exec('spark-submit --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.7 --master spark://ec2-52-91-13-65.compute-1.amazonaws.com:7077 --driver-class-path /home/ubuntu/postgresql-42.2.14.jar /home/ubuntu/Housing-Insight/process_datasets/integrate_data.py');
+		const { stdout, stderr } = await exec("spark-submit --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.7 --master spark://ec2-52-91-13-65.compute-1.amazonaws.com:7077 --driver-class-path /home/ubuntu/postgresql-42.2.14.jar /home/ubuntu/Housing-Insight/process_datasets/integrate_data.py '310 3rd Ave, New York, NY 10010'");
 		console.log('stdout:', stdout);
 		console.log('stderr:', stderr);
 		return response.status(200).send(stdout);	
