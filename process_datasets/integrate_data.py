@@ -96,6 +96,10 @@ print(precinctrow[0].precinct)
 precinctrow = precinctrow[0]
 
 #mental_health
+house_ids = [ row.house_id for row in buildings.collect()]
+id_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
+
+
 mh = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
@@ -263,25 +267,31 @@ results.show()
 
 #collissions
 
-vehicle_collissions = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","vehicle_collissions") \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
 
+
+query_string = 'SELECT * FROM building_to_collissions WHERE house_id IN '+id_string
+print(query_string)
 collissions = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","building_to_collissions") \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
 
+collission_ids = [ row.collision_id for row in collissions.collect()]
+collission_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
+query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN '+collission_string
+print(query_string)
 
-vehicle_collissions.cache()
-collissions.cache()
+vehicle_collissions = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
 
 total_num1 = vehicle_collissions.count()
 total_num2 = collissions.count()
