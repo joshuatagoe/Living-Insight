@@ -100,7 +100,7 @@ house_ids = [ row.house_id for row in buildings.collect()]
 id_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
 
 
-query_string = 'SELECT * FROM mental_health WHERE query_id IN ( SELECT query_id FROM house_id_mental_health WHERE house_id IN '+id_string+' GROUP BY query_id')
+query_string = 'SELECT * FROM mental_health WHERE query_id IN ( SELECT query_id FROM house_id_mental_health WHERE house_id IN '+id_string+' GROUP BY query_id )'
 
 mh = spark.read \
     .format("jdbc") \
@@ -129,7 +129,7 @@ newbuilding['house_id'] = building_id
 newbuilding['total_services'] = results.count()
 
 #subway_entrances
-query_string = 'SELECT * FROM subway_entrances WHERE object_id IN ( SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id')
+query_string = 'SELECT * FROM subway_entrances WHERE object_id IN ( SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id )'
 
 
 subway_entrances = spark.read \
@@ -155,7 +155,7 @@ newbuilding['total_entrances'] = results.count()
 
 
 #crime
-query_string = 'SELECT * FROM nypd_crime_data WHERE "CMPLNT_NUM" IN ( SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM"')
+query_string = 'SELECT * FROM nypd_crime_data WHERE "CMPLNT_NUM" IN ( SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM" )'
 
 
 crimes = spark.read \
@@ -199,7 +199,7 @@ def handle_air(geo_entity_name,geo_entity_id, building=precinctrow):
 air_udf = udf(handle_air, BooleanType())
 spark.udf.register("air_udf",handle_air, BooleanType())
 
-query_string = 'SELECT * FROM air_quality WHERE indicator_data_id IN ( SELECT indicator_data_id FROM building_to_air_quality WHERE house_id IN '+id_string+' GROUP BY indicator_data_id')
+query_string = 'SELECT * FROM air_quality WHERE indicator_data_id IN ( SELECT indicator_data_id FROM building_to_air_quality WHERE house_id IN '+id_string+' GROUP BY indicator_data_id)'
 air_quality = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
@@ -219,7 +219,7 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 
 #collissions
 print("collission")
-query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN ( SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id')
+query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN ( SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id)'
 
 vehicle_collissions = spark.read \
     .format("jdbc") \
