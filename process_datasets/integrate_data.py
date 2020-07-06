@@ -298,12 +298,15 @@ potentialcol = spark.sql('SELECT * FROM house_collission WHERE _distance_udf(lat
 potentialcol.createOrReplaceTempView("house_collission")
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
-#update new building row
+""" #update new building row
 newbuilding['total_collissions'] = results.count()
 calculated_info = potentialcol.agg(sum("num_injured"),sum("num_killed")).collect()[0]
 newbuilding['total_injured'] = calculated_info[0]
 newbuilding['total_killed'] = calculated_info[1]
 newbuilding['total_affected'] = calculated_info[0]+calculated_info[1]
+
+
+ """
 del newbuilding['distance']
 
 
