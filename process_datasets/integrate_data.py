@@ -270,19 +270,8 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 
 
 #collissions
-query_string = 'SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id'
-
-collissions = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query",query_string) \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-collission_ids = [ row.collision_id for row in collissions.collect()]
-collission_string = ('('+','.join("'"+str(x)+"'" for x in collission_ids)+')')
-query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN '+collission_string
+print("collission")
+query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN ( SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id')
 
 vehicle_collissions = spark.read \
     .format("jdbc") \
@@ -292,11 +281,13 @@ vehicle_collissions = spark.read \
     .option("password", "postgres") \
     .load()
 
+print("done loading")
 #checks if the chosen vehicle_collissions fit the condition
 vehicle_collissions.createOrReplaceTempView("house_collission")
 potentialcol = spark.sql('SELECT * FROM house_collission WHERE _distance_udf(lat,long)')
 potentialcol.createOrReplaceTempView("house_collission")
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
+print('filter complete')
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
 """ #update new building row
 newbuilding['total_collissions'] = results.count()
