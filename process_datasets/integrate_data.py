@@ -26,8 +26,6 @@ sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/randomdistribution.py"
 address = '11 crooke avenue brooklyn new york'
 if(len(sys.argv)>1):
     address = sys.argv[1].lower()
-print("This is the address")
-print(address)
 latlng = computedistance.getLatLong(address)
 
 def handle_building(lat, lng,latlng=latlng):
@@ -119,7 +117,6 @@ potentialmh.createOrReplaceTempView("house_mh")
 #creates house_id for house being added
 building_id = uuid.uuid1()
 building_id = building_id.hex
-print(building_id)
 #slect queries from mhs, pairing it with the house_id
 results = spark.sql("SELECT query_id, '"+building_id+"' AS house_id FROM house_mh")
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="house_id_mental_health", properties = { "user" : "postgres", "password" : "postgres" } )
@@ -179,9 +176,6 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 total_felonies = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='FELONY').count()
 total_violations = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='VIOLATION').count()
 total_misdemeanors = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='MISDEMEANOR').count()
-print(total_felonies)
-print(total_misdemeanors)
-print(total_violations)
 newbuilding['total_felonies'] = total_felonies
 newbuilding['total_misdemeanors'] = total_misdemeanors
 newbuilding['total_violations'] = total_violations
@@ -218,7 +212,6 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 
 
 #collissions
-print("collission")
 query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN ( SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id)'
 
 vehicle_collissions = spark.read \
@@ -229,13 +222,11 @@ vehicle_collissions = spark.read \
     .option("password", "postgres") \
     .load()
 
-print("done loading")
 #checks if the chosen vehicle_collissions fit the condition
 vehicle_collissions.createOrReplaceTempView("house_collission")
 potentialcol = spark.sql('SELECT * FROM house_collission WHERE _distance_udf(lat,long)')
 potentialcol.createOrReplaceTempView("house_collission")
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
-print('filter complete')
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
 """ #update new building row
 newbuilding['total_collissions'] = results.count()

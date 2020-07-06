@@ -55,3 +55,10 @@ CREATE TABLE final_buildings_set AS SELECT * FROM buildings_with_kml NATURAL JOI
 /* changes to data */
 DELETE FROM vehicle_collissions WHERE collision_id IS NULL;
 DELETE FROM building_to_collissions WHERE collision_id IS NULL;
+
+/*query to delete added data */
+DELETE FROM house_id_mental_health WHERE house_id='057a0f4abef411ea97e20a3f41da2581';
+DELETE FROM building_to_subway WHERE house_id='057a0f4abef411ea97e20a3f41da2581';
+DELETE FROM building_to_air_quality WHERE house_id='057a0f4abef411ea97e20a3f41da2581';
+DELETE FROM building_to_collissions WHERE house_id='057a0f4abef411ea97e20a3f41da2581';
+DELETE FROM building_id_to_crime_id WHERE house_id='057a0f4abef411ea97e20a3f41da2581';

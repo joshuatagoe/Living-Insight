@@ -1,4 +1,4 @@
-DROP VIEW collision_data;
+DROP VIEW collission_data;
 CREATE VIEW collission_data AS SELECT * FROM vehicle_collissions NATURAL JOIN building_to_collissions WHERE house_id= :v1;
 
 UPDATE final_buildings_set SET total_collissions = (SELECT COUNT(*) FROM building_to_collissions WHERE house_id= :v1 ) WHERE house_id= :v1;
