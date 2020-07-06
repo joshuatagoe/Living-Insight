@@ -13,7 +13,9 @@ class Query extends React.Component{
             health_services2: 0,
             crimes1 : 0,
             crimes2 : 0,
-            viewquery: false
+            viewquery: false,
+            search: "",
+            search_type: 'house_id'
      }
      this.toggleQueries = this.toggleQueries.bind(this)
      this.handleChange = this.handleChange.bind(this)
@@ -50,12 +52,24 @@ class Query extends React.Component{
         }
         return(
             <div class="sidebar">
-                <input class="searchbar" type="text" placeholder="Search..."></input>
+                <form onSubmit={(e)=>{
+                    e.preventDefault();
+                    console.log("test")
+                    this.props.search_data(this.state.search_type, this.state.search)
+                    
+
+                }}>
+                    <select onChange={this.handleChange} value={this.state.search_type} name="search_type">
+                    <option value="house_id">house_id</option>
+                    <option value="address">address</option>
+                    </select>
+                    <input name="search" class="searchbar" onChange={this.handleChange} value={this.state.search} type="text" placeholder="Search..."></input>
+                    </form>
                 <hr></hr>
                 {!this.props.viewquery && <form onSubmit={(e)=>{
-                    this.props.handleSubmit(this.state.vehicle_collission1, this.state.vehicle_collission2, this.state.subway_entrances1, this.state.subway_entrances2, this.state.health_services1, this.state.health_services2, this.state.crimes1, this.state.crimes2)
                     e.preventDefault();
-                    
+                    this.props.handleSubmit(this.state.vehicle_collission1, this.state.vehicle_collission2, this.state.subway_entrances1, this.state.subway_entrances2, this.state.health_services1, this.state.health_services2, this.state.crimes1, this.state.crimes2)
+
                     }}>
                     <label><div>Vehicle Collissions<div>Avg: 61509.841093117409 SD: 38094.55832552</div></div>
                         <input name="vehicle_collission1" type="number" value={this.state.vehicle_collission1} onChange={this.handleChange}/>

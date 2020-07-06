@@ -24,7 +24,17 @@ class App extends React.Component{
     this.fetch_mental_health = this.fetch_mental_health.bind(this)
     this.fetch_subway_entrances = this.fetch_subway_entrances.bind(this)
     this.fetch_detail_placemarks = this.fetch_detail_placemarks.bind(this)
+    this.search_data = this.search_data.bind(this)
     this.close = this.close.bind(this);
+  }
+
+  search_data(search_type, search){
+    let url = `http://ec2-52-91-13-65.compute-1.amazonaws.com:9000/search?search_type=${search_type}&search='${search}'`
+    fetch(url)
+        .then( res=> res.json())
+        .then(res=> this.setState({response: res}))
+        .catch(err=>err);
+
   }
 
   fetch_detail_placemarks(){
@@ -93,7 +103,7 @@ close(){
     const WrappedMap = withScriptjs(withGoogleMap(Map));
     return(
 
-        <div>{!this.state.selectedHouse && <Query setSelectedHouse={this.setSelectedHouse} response={this.state.response} handleChange={this.handleChange} handleSubmit={this.handleSubmit} />}<div style={{ width: "100vw", height: "100vh"}}>
+        <div>{!this.state.selectedHouse && <Query search_data={this.search_data} setSelectedHouse={this.setSelectedHouse} response={this.state.response} handleChange={this.handleChange} handleSubmit={this.handleSubmit} />}<div style={{ width: "100vw", height: "100vh"}}>
             <WrappedMap 
             googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${
               process.env.REACT_APP_GOOGLE_KEY
