@@ -98,20 +98,9 @@ newbuilding['rental_price'] = 0
 #mental_health
 house_ids = [ row.house_id for row in buildings.collect()]
 id_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
-query_string = 'SELECT query_id FROM house_id_mental_health WHERE house_id IN '+id_string+' GROUP BY query_id'
 
 
-id_mh = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query",query_string) \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-query_ids = [ row.query_id for row in id_mh.collect()]
-data_string = ('('+','.join("'"+str(x)+"'" for x in query_ids)+')')
-query_string = 'SELECT * FROM mental_health WHERE query_id IN '+data_string
+query_string = 'SELECT * FROM mental_health WHERE query_id IN ( SELECT query_id FROM house_id_mental_health WHERE house_id IN '+id_string+' GROUP BY query_id')
 
 mh = spark.read \
     .format("jdbc") \
@@ -140,22 +129,7 @@ newbuilding['house_id'] = building_id
 newbuilding['total_services'] = results.count()
 
 #subway_entrances
-query_string = 'SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id'
-
-subway = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query",query_string) \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-
-object_ids = [ row.object_id for row in subway.collect()]
-data_string = ('('+','.join("'"+str(x)+"'" for x in object_ids)+')')
-query_string = 'SELECT * FROM subway_entrances WHERE object_id IN '+data_string
-
-
+query_string = 'SELECT * FROM subway_entrances WHERE object_id IN ( SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id')
 
 
 subway_entrances = spark.read \
@@ -181,20 +155,7 @@ newbuilding['total_entrances'] = results.count()
 
 
 #crime
-query_string = 'SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM"'
-
-crime_ids = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query",query_string) \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-cmplnt_ids = [ row.CMPLNT_NUM for row in crime_ids.collect()]
-data_string = ('('+','.join("'"+str(x)+"'" for x in cmplnt_ids)+')')
-query_string = 'SELECT * FROM nypd_crime_data WHERE "CMPLNT_NUM" IN '+data_string
-
+query_string = 'SELECT * FROM nypd_crime_data WHERE "CMPLNT_NUM" IN ( SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM"')
 
 
 crimes = spark.read \
@@ -238,20 +199,7 @@ def handle_air(geo_entity_name,geo_entity_id, building=precinctrow):
 air_udf = udf(handle_air, BooleanType())
 spark.udf.register("air_udf",handle_air, BooleanType())
 
-query_string = 'SELECT indicator_data_id FROM building_to_air_quality WHERE house_id IN '+id_string+' GROUP BY indicator_data_id'
-
-building_air = spark.read \
-    .format("jdbc") \
-    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query",query_string) \
-    .option("user","postgres") \
-    .option("password", "postgres") \
-    .load()
-
-data_ids = [ row.indicator_data_id for row in building_air.collect()]
-data_string = ('('+','.join("'"+str(x)+"'" for x in data_ids)+')')
-query_string = 'SELECT * FROM air_quality WHERE indicator_data_id IN '+data_string
-
+query_string = 'SELECT * FROM air_quality WHERE indicator_data_id IN ( SELECT indicator_data_id FROM building_to_air_quality WHERE house_id IN '+id_string+' GROUP BY indicator_data_id')
 air_quality = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
