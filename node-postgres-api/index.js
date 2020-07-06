@@ -26,6 +26,7 @@ app.get('/search',(req,res)=>{
     var query_index = req.originalUrl.indexOf('?');
     var query_string = (query_index>=0)?req.originalUrl.slice(query_index+1):'';
     if(req.query.search_type==='house_id'){
+       console.log(query_string)
        return res.redirect('/search_id?'+query_string)
     }
     if(req.query.search_type==='address'){
@@ -39,6 +40,7 @@ app.get('/search_address',db.search_address)
 app.get('/test',db.test_spark_job)
 
 
-app.listen(port,()=>{
+var server = app.listen(port,()=>{
     console.log(`App Running on port ${port}.`)
 })
+server.timeout =3000000

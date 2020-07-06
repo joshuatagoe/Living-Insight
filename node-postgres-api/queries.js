@@ -84,7 +84,9 @@ const get_subway_entrances = (request, response) => {
   }
 
 const search_house_id = ( request, response)=>{
+  console.log("test")
   search = request.query.search
+  console.log(search)
   pool.query(`SELECT * FROM  final_buildings_set WHERE house_id=${search}`, (error,results)=>{
     if(error){
       throw error
@@ -96,21 +98,26 @@ const search_house_id = ( request, response)=>{
 
 }
 
-const search_address = ( request, response)=>{
+const search_address = async ( request, response)=>{
  console.log("got to function")
  console.log(request.query)
- const search = request.query.search
-  pool.query(`SELECT * FROM  final_buildings_set WHERE address=${search}`, (error,results)=>{
-    if(results.length<1){
+ let search = request.query.search.toLowerCase().slice(1,-1)
+console.log(search)
+ search = search.replace(/^\s+|\s+$/g, '');
+ search=`'${search}'`
+ console.log(search)
+  pool.query(`SELECT * FROM  final_buildings_set WHERE address=${search}`, async (error,results)=>{
+    if(results.rows.length<1){
       try {
         const address = search
-        const { stdout, stderr } = await exec(`spark-submit --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.7 --master spark://ec2-52-91-13-65.compute-1.amazonaws.com:7077 --driver-class-path /home/ubuntu/postgresql-42.2.14.jar /home/ubuntu/Housing-Insight/process_datasets/integrate_data.py '${address}'`);
-        const _id  = stdout
-        console.log(_id)
-        const {stdout, stderr } = await exec(`psql -U postgres -w -v v1="'${_id}'" -h 127.0.0.1 -d living_insight -f /home/ubuntu/Housing-Insight/process_datasets/integrate_data.sql`)
+        const { stdout, stderr } = await exec(`spark-submit --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.7 --master spark://ec2-52-91-13-65.compute-1.amazonaws.com:7077 --driver-class-path /home/ubuntu/postgresql-42.2.14.jar /home/ubuntu/Housing-Insight/process_datasets/integrate_data.py ${address}`);
+        const _id = stdout.replace(/\s/g, "");
+	exec(`psql -U postgres -w -v v1="'${_id}'" -h 127.0.0.1 -d living_insight -f /home/ubuntu/Housing-Insight/process_datasets/integrate_data.sql`)
         console.log('stdout:', stdout);
-        console.log('stderr:', stderr);
-        pool.query(`SELECT * FROM  final_buildings_set WHERE address=${search}`, (error,results)=>{
+	query_string =`SELECT * FROM  final_buildings_set WHERE house_id='${_id}'`
+	console.log(query_string)
+        pool.query(query_string, (error,results)=>{
+		console.log(results.rows)
           if(error){
             throw error
           }
@@ -121,12 +128,13 @@ const search_address = ( request, response)=>{
       console.error(e)
     }
     }
+	else{
+	return response.status(200).json(results.rows)
+}
     if(error){
       throw error
 
     }
-    return response.status(200).json(results.rows)
-
   })
 
 }
@@ -136,12 +144,11 @@ const test_spark_job = async (request, response)=>{
   const address = '25 Union Square W, New York, NY 10003'
 	try {
 		const { stdout, stderr } = await exec(`spark-submit --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.7 --master spark://ec2-52-91-13-65.compute-1.amazonaws.com:7077 --driver-class-path /home/ubuntu/postgresql-42.2.14.jar /home/ubuntu/Housing-Insight/process_datasets/integrate_data.py '${address}'`);
-    const _id  = stdout
-    console.log(_id)
-    const {stdout, stderr } = await exec(`psql -U postgres -w -v v1="'${_id}'" -h 127.0.0.1 -d living_insight -f /home/ubuntu/Housing-Insight/process_datasets/integrate_data.sql`)
-    console.log('stdout:', stdout);
-		console.log('stderr:', stderr);
-		return response.status(200).send(stdout);	
+                const _id  = stdout
+                console.log(_id)
+                exec(`psql -U postgres -w -v v1="'${_id}'" -h 127.0.0.1 -d living_insight -f /home/ubuntu/Housing-Insight/process_datasets/integrate_data.sql`)
+                console.log('stdout:', stdout);
+		return response.status(200).send({ data: stdout});	
 } catch(e) {
 	console.error(e)
 }
