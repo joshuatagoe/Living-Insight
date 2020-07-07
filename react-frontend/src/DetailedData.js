@@ -187,7 +187,7 @@ class DetailedData extends React.Component{
 
         return(
             <div class="bottombar">
-                <button class="close" onClick={this.props.close}></button>
+                <button class="close" onClick={this.props.close}>BACK</button>
                 {tableauEmbed}
 {/*                 <div class="column">
                 {info}

@@ -123,7 +123,6 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 
 #update new building row
 newbuilding['house_id'] = building_id
-newbuilding['total_services'] = results.count()
 
 #subway_entrances
 query_string = 'SELECT * FROM subway_entrances WHERE object_id IN ( SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id )'
@@ -146,10 +145,6 @@ results = spark.sql("SELECT object_id, '"+building_id+"' AS house_id FROM house_
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_subway", properties = { "user" : "postgres", "password" : "postgres" } )
 
 
-#update new building row
-newbuilding['total_entrances'] = results.count()
-
-
 
 #crime
 query_string = 'SELECT * FROM nypd_crime_data WHERE "CMPLNT_NUM" IN ( SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM" )'
@@ -170,17 +165,6 @@ potentialcrimes = spark.sql('SELECT * FROM house_crime WHERE _distance_udf(Latit
 potentialcrimes.createOrReplaceTempView("house_crime")
 results = spark.sql("""SELECT `CMPLNT_NUM`, '"""+building_id+"""' AS house_id FROM house_crime""")
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_id_to_crime_id", properties = { "user" : "postgres", "password" : "postgres" } )
-
-
-#Update new building row
-total_felonies = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='FELONY').count()
-total_violations = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='VIOLATION').count()
-total_misdemeanors = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='MISDEMEANOR').count()
-newbuilding['total_felonies'] = total_felonies
-newbuilding['total_misdemeanors'] = total_misdemeanors
-newbuilding['total_violations'] = total_violations
-newbuilding['total_crimes'] = total_felonies+total_violations+total_misdemeanors
-
 
 #air_quality
 def handle_air(geo_entity_name,geo_entity_id, building=precinctrow):
