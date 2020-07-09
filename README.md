@@ -117,9 +117,71 @@ Data from DOBs buildings dataset is used to simulate real-estate data. [sparkpro
 
 
 #### Data Processing
-Using the Harversine formula, the distance between each building and every datapoint for every dataset is calculated. A new dataset is created storing the house_id, and id for all datapoints within 1.5 miles of a specific building. Datasets that do not have a latitude and longitude, have their latitude and longitude calculated using Google's geolocation API. Datapoints that do not have a specific address for which this can be done, such as data for police precincts, or boroughs, or community districts are matched to a building based on those parameters. The community district or precincts of separate buildings are calculated by using the KML data for [precincts](https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz) and [community districts](https://data.cityofnewyork.us/City-Government/Community-Districts/yfnk-k7r4) from nyc open data, and an [algorithm](https://w)ww.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/) to check if a point lies within a polygon
+Using the Harversine formula, the distance between each building and every datapoint for every dataset is calculated. A new dataset is created storing the house_id, and id for all datapoints within 1.5 miles of a specific building. Datasets that do not have a latitude and longitude, have their latitude and longitude calculated using Google's geolocation API. Datapoints that do not have a specific address for which this can be done, such as data for police precincts, or boroughs, or community districts are matched to a building based on those parameters. The community district or precincts of separate buildings are calculated by using the KML data for [precincts](https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz) and [community districts](https://data.cityofnewyork.us/City-Government/Community-Districts/yfnk-k7r4) from nyc open data, and an [algorithm](https://w)ww.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/) to check if a point lies within a polygon.
 
-##### Output Tables
+After that, averages and standard deviations are calculated for each dataset using sql queries, as well totals for each building.
+```
+/* Calculate total number of felonies and misdemeanor complaints around every building */
+WITH UPD AS ( SELECT  * FROM building_id_to_crime_id NATURAL JOIN nypd_crime_data WHERE house_id='B00269850-I1'; ) SELECT "LAW_CAT_CD", "OFNS_DESC" FROM upd;
+CREATE TABLE num_felonies AS SELECT house_id, COUNT(*) AS total_felonies FROM building_id_to_crime_id NATURAL JOIN nypd_crime_data WHERE "LAW_CAT_CD"='FELONY' GROUP BY house_id;
+CREATE TABLE num_misdemeanors AS SELECT house_id, COUNT(*) AS total_misdemeanors FROM building_id_to_crime_id NATURAL JOIN nypd_crime_data WHERE "LAW_CAT_CD"='MISDEMEANOR' GROUP BY house_id;
+CREATE TABLE num_violations AS SELECT house_id, COUNT(*) AS total_violations FROM building_id_to_crime_id NATURAL JOIN nypd_crime_data WHERE "LAW_CAT_CD"='VIOLATION' GROUP BY house_id;
+CREATE TABLE felonies_aggregate_data AS SELECT avg(total_felonies) AS mean_felonies, stddev(total_felonies) AS sd_felonies FROM num_felonies;
+CREATE TABLE misdemeanors_aggregate_data AS SELECT avg(total_misdemeanors) AS mean_misdemeanors, stddev(total_misdemeanors) AS sd_misdemeanors FROM num_misdemeanors;
+CREATE TABLE violations_aggregate_data AS SELECT avg(total_violations) AS mean_violations, stddev(total_violations) AS sd_violations FROM num_violations;
+
+/* get total crimes committed */
+CREATE TABLE num_crimes AS SELECT house_id, COUNT(*) AS total_crimes FROM building_id_to_crime_id NATURAL JOIN nypd_crime_data GROUP BY house_id;
+CREATE TABLE crimes_aggregate_data AS SELECT avg(total_crimes) AS mean_crimes, stddev(total_crimes) AS sd_crimes FROM num_crimes;
+
+/* calculate mean and standard deviation */
+/*mH used as an example */
+
+CREATE TABLE num_services AS SELECT house_id, COUNT(*) AS total_services FROM house_id_mental_health NATURAL JOIN mental_health GROUP BY house_id;
+CREATE TABLE mh_aggregate_data AS SELECT avg(total_services) AS avg_services, stddev(total_services) AS sd_services FROM num_services;
+
+/* create new table that JOINs all tables to main buildings table */
+CREATE TABLE final_buildings_set AS SELECT * FROM buildings_with_kml NATURAL JOIN  num_services NATURAL JOIN mh_aggregate_data NATURAL JOIN num_subway NATURAL JOIN num_collissions NATURAL JOIN num_felonies NATURAL JOIN num_misdemeanors NATURAL JOIN num_violations NATURAL JOIN num_crimes;
+
+```
+
+##### Example Output Tables
+|building_to_collissions| 
+| ---------- |
+|house_id|
+|collission_id|
+
+
+|house_id_mental_health| 
+| ---------- |
+|house_id|
+|query_id|
+
+
+|fina_buildings_set| 
+| ---------- |
+|house_id|
+|latitude|
+|longitude|
+|addresss|
+|borough|
+|community_district|
+|precinct|
+|rental_price|
+|total_services|
+|total_entrancs|
+|total_collissions|
+|total_injured|
+|total_killed|
+|total_affected|
+|total_felonies|
+|total_misdemeanors|
+|total_violations|
+|total_crimes|
+
+
+
+
 
 
 
