@@ -3,7 +3,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jun 14 06:54:46 2020
-
 @author: joshua
 """
 
@@ -21,8 +20,9 @@ import time
 
 
 
-start_time = time.time()
 
+
+start_time = time.time()
 sc = SparkContext("local", "SparkFile App")
 sqlContext = SQLContext(sc)
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
@@ -100,9 +100,20 @@ newbuilding['rental_price'] = 0
 #mental_health
 house_ids = [ row.house_id for row in buildings.collect()]
 id_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
+query_string = 'SELECT query_id FROM house_id_mental_health WHERE house_id IN '+id_string+' GROUP BY query_id'
 
 
-query_string = 'SELECT * FROM mental_health WHERE query_id IN ( SELECT query_id FROM house_id_mental_health WHERE house_id IN '+id_string+' GROUP BY query_id )'
+id_mh = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+query_ids = [ row.query_id for row in id_mh.collect()]
+data_string = ('('+','.join("'"+str(x)+"'" for x in query_ids)+')')
+query_string = 'SELECT * FROM mental_health WHERE query_id IN '+data_string
 
 mh = spark.read \
     .format("jdbc") \
@@ -121,15 +132,32 @@ potentialmh.createOrReplaceTempView("house_mh")
 #creates house_id for house being added
 building_id = uuid.uuid1()
 building_id = building_id.hex
+
 #slect queries from mhs, pairing it with the house_id
 results = spark.sql("SELECT query_id, '"+building_id+"' AS house_id FROM house_mh")
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="house_id_mental_health", properties = { "user" : "postgres", "password" : "postgres" } )
 
 #update new building row
 newbuilding['house_id'] = building_id
+newbuilding['total_services'] = results.count()
 
 #subway_entrances
-query_string = 'SELECT * FROM subway_entrances WHERE object_id IN ( SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id )'
+query_string = 'SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id'
+
+subway = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+
+object_ids = [ row.object_id for row in subway.collect()]
+data_string = ('('+','.join("'"+str(x)+"'" for x in object_ids)+')')
+query_string = 'SELECT * FROM subway_entrances WHERE object_id IN '+data_string
+
+
 
 
 subway_entrances = spark.read \
@@ -149,9 +177,26 @@ results = spark.sql("SELECT object_id, '"+building_id+"' AS house_id FROM house_
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_subway", properties = { "user" : "postgres", "password" : "postgres" } )
 
 
+#update new building row
+newbuilding['total_entrances'] = results.count()
+
+
 
 #crime
-query_string = 'SELECT * FROM nypd_crime_data WHERE "CMPLNT_NUM" IN ( SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM" )'
+query_string = 'SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM"'
+
+crime_ids = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+cmplnt_ids = [ row.CMPLNT_NUM for row in crime_ids.collect()]
+data_string = ('('+','.join("'"+str(x)+"'" for x in cmplnt_ids)+')')
+query_string = 'SELECT * FROM nypd_crime_data WHERE "CMPLNT_NUM" IN '+data_string
+
 
 
 crimes = spark.read \
@@ -170,6 +215,17 @@ potentialcrimes.createOrReplaceTempView("house_crime")
 results = spark.sql("""SELECT `CMPLNT_NUM`, '"""+building_id+"""' AS house_id FROM house_crime""")
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_id_to_crime_id", properties = { "user" : "postgres", "password" : "postgres" } )
 
+
+#Update new building row
+total_felonies = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='FELONY').count()
+total_violations = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='VIOLATION').count()
+total_misdemeanors = potentialcrimes.filter(potentialcrimes['LAW_CAT_CD']=='MISDEMEANOR').count()
+newbuilding['total_felonies'] = total_felonies
+newbuilding['total_misdemeanors'] = total_misdemeanors
+newbuilding['total_violations'] = total_violations
+newbuilding['total_crimes'] = total_felonies+total_violations+total_misdemeanors
+
+
 #air_quality
 def handle_air(geo_entity_name,geo_entity_id, building=precinctrow):
     if building.borough.lower() == geo_entity_name.lower():
@@ -181,7 +237,20 @@ def handle_air(geo_entity_name,geo_entity_id, building=precinctrow):
 air_udf = udf(handle_air, BooleanType())
 spark.udf.register("air_udf",handle_air, BooleanType())
 
-query_string = 'SELECT * FROM air_quality WHERE indicator_data_id IN ( SELECT indicator_data_id FROM building_to_air_quality WHERE house_id IN '+id_string+' GROUP BY indicator_data_id)'
+query_string = 'SELECT indicator_data_id FROM building_to_air_quality WHERE house_id IN '+id_string+' GROUP BY indicator_data_id'
+
+building_air = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+data_ids = [ row.indicator_data_id for row in building_air.collect()]
+data_string = ('('+','.join("'"+str(x)+"'" for x in data_ids)+')')
+query_string = 'SELECT * FROM air_quality WHERE indicator_data_id IN '+data_string
+
 air_quality = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
@@ -200,7 +269,19 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 
 
 #collissions
-query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN ( SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id)'
+query_string = 'SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id'
+
+collissions = spark.read \
+    .format("jdbc") \
+    .option("url","jdbc:postgresql://localhost:5432/living_insight") \
+    .option("query",query_string) \
+    .option("user","postgres") \
+    .option("password", "postgres") \
+    .load()
+
+collission_ids = [ row.collision_id for row in collissions.collect()]
+collission_string = ('('+','.join("'"+str(x)+"'" for x in collission_ids)+')')
+query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN '+collission_string
 
 vehicle_collissions = spark.read \
     .format("jdbc") \
@@ -216,15 +297,12 @@ potentialcol = spark.sql('SELECT * FROM house_collission WHERE _distance_udf(lat
 potentialcol.createOrReplaceTempView("house_collission")
 results = spark.sql("SELECT collision_id, '"+building_id+"' AS house_id FROM house_collission")
 results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_collissions", properties = { "user" : "postgres", "password" : "postgres" } )
-""" #update new building row
+#update new building row
 newbuilding['total_collissions'] = results.count()
 calculated_info = potentialcol.agg(sum("num_injured"),sum("num_killed")).collect()[0]
 newbuilding['total_injured'] = calculated_info[0]
 newbuilding['total_killed'] = calculated_info[1]
 newbuilding['total_affected'] = calculated_info[0]+calculated_info[1]
-
-
- """
 del newbuilding['distance']
 
 
@@ -236,6 +314,6 @@ rdd = sc.parallelize([newbuilding])
 df = rdd.toDF()
 df.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="final_buildings_set", properties = { "user" : "postgres", "password" : "postgres" } )
 print(building_id)
-
 print("--- %s seconds ---" % (time.time() - start_time))
+
 spark.stop()
