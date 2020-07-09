@@ -158,7 +158,7 @@ CREATE TABLE final_buildings_set AS SELECT * FROM buildings_with_kml NATURAL JOI
 |query_id|
 
 
-|fina_buildings_set| 
+|final_buildings_set| 
 | ---------- |
 |house_id|
 |latitude|
