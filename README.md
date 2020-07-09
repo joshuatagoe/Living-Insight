@@ -54,13 +54,13 @@ Front-End -> Created using ReactJS in Conjunction with Tableau for table visuali
 
 
 ## Dataset
-![Air Quality](https://data.cityofnewyork.us/Environment/Air-Quality/c3uy-2p5r)
-![Mental Health Services](https://data.cityofnewyork.us/Health/Mental-Health-Service-Finder-Data/8nqg-ia7v)
-![Subway Entrances](https://data.cityofnewyork.us/Transportation/Subway-Entrances/drex-xx56)
-![NYPD Crime Data](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243)
-![Vehicle Collissions Data](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95)
-![DOB Buildings Dataset](https://data.cityofnewyork.us/Housing-Development/DOB-NOW-Build-Approved-Permits/rbx6-tga4)
-
+[Air Quality](https://data.cityofnewyork.us/Environment/Air-Quality/c3uy-2p5r)  
+[Mental Health Services](https://data.cityofnewyork.us/Health/Mental-Health-Service-Finder-Data/8nqg-ia7v)  
+[Subway Entrances](https://data.cityofnewyork.us/Transportation/Subway-Entrances/drex-xx56)  
+[NYPD Crime Data](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243)  
+[Vehicle Collissions Data](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95)  
+[DOB Buildings Dataset](https://data.cityofnewyork.us/Housing-Development/DOB-NOW-Build-Approved-Permits/rbx6-tga4)  
+  
 ## File Structure
 
 Placeholder text....
