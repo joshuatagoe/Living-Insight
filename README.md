@@ -104,10 +104,6 @@ You will need to setup your EC2 security group, and permissions in your psql pg_
 [NYPD Crime Data](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243)  
 [Vehicle Collissions Data](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95)  
 [DOB Buildings Dataset](https://data.cityofnewyork.us/Housing-Development/DOB-NOW-Build-Approved-Permits/rbx6-tga4)  
-  
-## File Structure
-
-Placeholder text....
 
 ## Methodology
 
