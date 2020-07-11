@@ -18,13 +18,6 @@ def getLatLong(address):
     lng = geocode[0]['geometry']['location']['lng']
     return [ lng, lat]
 
-
-def getBorough():
-    return None
-
-def getUHF42():
-    return None
-    
 #uses haversine formula to compute the distance(miles) between two points
 def computeDistance(position1, position2):
     R = 3958.8
@@ -37,6 +30,6 @@ def computeDistance(position1, position2):
     difflat = rlat2-rlat1 #radian difference latitude
     difflong = (long-long2)* (math.pi/180) #radian difference longitude
     d = 2 * R * math.asin(math.sqrt(math.sin(difflat/2)*math.sin(difflat/2)+math.cos(rlat1)*math.cos(rlat2)*math.sin(difflong/2)*math.sin(difflong/2)));
-    return d;
+    return d
 
 

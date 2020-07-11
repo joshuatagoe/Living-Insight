@@ -54,19 +54,18 @@ buildings = spark.read.format("csv") \
     .option("inferSchema","true") \
     .load("s3a://living-insight-data/DOB_NOW__Build___Approved_Permits.csv")
     
-""" mental_health = spark.read.format("csv") \
+mental_health = spark.read.format("csv") \
     .option("header","true") \
     .option("inferSchema","true") \
     .load("s3a://living-insight-data/Mental_Health_Service_Finder_Data.csv")
-    
-     """
+
 buildings_rdd = buildings.limit(1000).rdd.map(processhouse)
 buildings = buildings_rdd.toDF()
 
 buildings.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table = 'buildings', properties = { "user": "postgres", "password" : "postgres" })
 
 
-""" mental_health_rdd = mental_health.rdd.zipWithIndex().map(processmentalhealth)
+mental_health_rdd = mental_health.rdd.zipWithIndex().map(processmentalhealth)
 mental_health = mental_health_rdd.toDF()
 mental_health = mental_health.filter(mental_health.longitude.isNotNull())
 
@@ -80,6 +79,5 @@ house_id_with_mental_health = buildings.crossJoin(mental_health).where(mental_ud
 mental_health.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table = 'mental_health', properties = { "user": "postgres", "password" : "postgres" })
 
 house_id_with_mental_health.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table = 'house_id_mental_health', properties = { "user": "postgres", "password" : "postgres" })
- """
 
 spark.stop()

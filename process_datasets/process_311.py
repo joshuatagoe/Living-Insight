@@ -68,10 +68,10 @@ _311_requests = _311_requests.filter(_311_requests["longitude"].isNotNull())
 
 _311_udf = udf(handle_building,BooleanType())
 
-#newdataframe = buildings.crossJoin(_311_requests).where(_311_udf(struct([buildings[x] for x in buildings.columns]), struct([_311_requests[x] for x in _311_requests.columns]))).select(buildings.house_id,_311_requests.unique_key)
+newdataframe = buildings.crossJoin(_311_requests).where(_311_udf(struct([buildings[x] for x in buildings.columns]), struct([_311_requests[x] for x in _311_requests.columns]))).select(buildings.house_id,_311_requests.unique_key)
 #newdataframe.limit(20).show()
 
-#newdataframe.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_311_requests", properties = { "user" : "postgres", "password" : "postgres" } )
+newdataframe.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="building_to_311_requests", properties = { "user" : "postgres", "password" : "postgres" } )
 _311_requests.write.jdbc("jdbc:postgresql://localhost:5432/living_insight", table="_311_requests", properties = { "user" : "postgres", "password" : "postgres" } )
 
 

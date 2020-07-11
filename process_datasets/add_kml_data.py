@@ -10,7 +10,7 @@ from pyspark import SparkContext
 from pyspark.sql import Row
 from pyspark.sql.functions import lit
 import testingprocesses
-import dataprocessing
+import polygon
 import boto3
 
 
@@ -18,7 +18,7 @@ import boto3
 
 sc = SparkContext("local", "SparkFile App")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/testingprocesses.py")
-sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/dataprocessing.py")
+sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/polygon.py")
 
 s3 = boto3.resource('s3')
 obj1 = s3.Object('living-insight-data', "Police Precincts.kml")
@@ -27,7 +27,7 @@ precincts = obj1.get()['Body'].read()
 districts = obj2.get()['Body'].read()
 
 def process_precincts(row, dat=precincts):
-    p = dataprocessing.Point(row.longitude,row.latitude)
+    p = polygon.Point(row.longitude,row.latitude)
     precinct = testingprocesses.findprecinct(p, dat)
     data = row.asDict()
     try:
@@ -37,7 +37,7 @@ def process_precincts(row, dat=precincts):
     return Row(**data)
     
 def process_districts(row, dat=districts):
-    p = dataprocessing.Point(row.longitude, row.latitude)
+    p = polygon.Point(row.longitude, row.latitude)
     district = testingprocesses.finddistrict(p,dat)
     data = row.asDict()
     try:

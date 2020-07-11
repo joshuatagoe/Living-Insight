@@ -1,5 +1,4 @@
-import React, {useRef, useEffect} from 'react';
-import { Bar, Line, Pie } from 'react-chartjs-2';
+import React from 'react';
 import './DetailedData.css';
 import {     get_mental_health_bin,
     get_subway_bin,
@@ -78,7 +77,6 @@ class DetailedData extends React.Component{
         }
         let url = "https://prod-useast-a.online.tableau.com/t/livinginsight/views/living_insight_sheets/mental_health/jnt297@nyu.edu/483edf18-3de8-4b8f-ae55-55ea292941a2?:display_count=n&:showVizHome=n&:origin=viz_share_link";
         viz = new tableau.Viz(this.myRef.current, url, options)
-        var tt = viz.getUrl();
         return viz;
     }
 
@@ -99,16 +97,14 @@ class DetailedData extends React.Component{
      
         viz.getWorkbook().activateSheetAsync(sheet_name).then(function(sheet){
             worksheet = sheet;
-            sheet.getSelectedMarksAsync().then(function(marks){
-                let mark = marks;
-                var value_array = new Array();
+/*             sheet.getSelectedMarksAsync().then(function(marks){
                 for(let k=0;k<marks.length;k++){
                 let pairs = marks[k].getPairs();
                 console.log(marks[k].getPairs());
                 console.log("Selected Mark " + k + " , " + pairs.length + " pairs of data");
                 }
             })
-            console.log(roundtoK(get_total_affected_bin(data.total_affected)))
+            console.log(roundtoK(get_total_affected_bin(data.total_affected))) */
         })
 
         .then(function(){
@@ -143,8 +139,9 @@ class DetailedData extends React.Component{
                 case "crime_types":
                     return worksheet.applyFilterAsync("House Id (Building Id To Crime Id)", data.house_id,
                     tableau.FilterUpdateType.REPLACE);
-                
-
+                default:
+                    return worksheet.selectMarksAsync("Total Services (bin)", get_mental_health_bin(data.total_services),
+                      tableau.SelectionUpdateType.REPLACE);
 
             }
 
@@ -177,12 +174,12 @@ class DetailedData extends React.Component{
   
     
     render(){
-        let data = this.props.house;
-        let info =<div>{data.house_id}</div>
-        let collissions;
+        //let data = this.props.house;
+        // let info =<div>{data.house_id}</div>
+/*         let collissions;
         if(this.state.vehicle_collissions){
             collissions =this.state.vehicle_collissions.map(()=>( <div> test</div>))
-        }
+        } */
         let tableauEmbed = (<div ref={this.myRef}></div>)
 
         return(

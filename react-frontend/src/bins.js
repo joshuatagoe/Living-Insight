@@ -99,8 +99,6 @@ function get_subway_bin(x){
         return 616;
     }
     return 644;
-
-    return x;
 }
 
 function get_felonies_bin(x){
