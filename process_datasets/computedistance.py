@@ -7,12 +7,13 @@ Created on Thu Jun 11 02:21:59 2020
 
 import googlemaps
 import math
+import config
 
 
 
 #uses google's geocoding api to get Latitude and Longitudes of given address
 def getLatLong(address):
-    gmaps = googlemaps.Client(key='AIzaSyAElWTfe3ngljDcScZo52GYqo3CbT_KN6g')
+    gmaps = googlemaps.Client(key=config.API.GoogleMapKey)
     geocode = gmaps.geocode(address)
     lat = geocode[0]['geometry']['location']['lat']
     lng = geocode[0]['geometry']['location']['lng']

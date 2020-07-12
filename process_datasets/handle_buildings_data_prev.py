@@ -20,11 +20,8 @@ sc = SparkContext("local", "SparkFile App")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/randomdistribution.py")
 
-
-
+start_time = time.time()
 def handle_building(building,mental_health):
-    if building.borough != mental_health.city_location and mental_health.city_location != "NEW YORK":
-        return False
     latlong = [building.longitude, building.latitude]
     latlong2 = [mental_health.longitude, mental_health.latitude ]
     if computedistance.computeDistance(latlong,latlong2) < 1.5:
