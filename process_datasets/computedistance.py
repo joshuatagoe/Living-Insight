@@ -34,3 +34,4 @@ def computeDistance(position1, position2):
     return d
 
 
+print(getLatLong('717 Franklin Ave, Brooklyn, NY 11238'))
