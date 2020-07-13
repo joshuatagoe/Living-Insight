@@ -17,6 +17,11 @@ from pyspark import SparkContext
 from pyspark.sql import SQLContext
 import sys
 import uuid 
+import time
+
+
+
+start_time = time.time()
 
 sc = SparkContext("local", "SparkFile App")
 sqlContext = SQLContext(sc)
@@ -58,6 +63,7 @@ spark = SparkSession \
     .appName("Process to pSqL") \
     .getOrCreate()
 
+
 buildings = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
@@ -79,10 +85,12 @@ _building_udf = spark.udf.register("_building_udf", handle_building, BooleanType
 _distance_udf = spark.udf.register("_distance_udf", handle_distance, BooleanType())
 
 #filter for buildings within 3 miles of address
+buildings = buildings.filter(_building_udf('latitude','longitude'))
 #precinct and community district
 buildings_rdd = buildings.rdd.map(find_building_distance)
 buildings = buildings_rdd.toDF()
 precinctrow = buildings.orderBy(asc("distance")).take(1)
+buildings.orderBy(asc("distance")).limit(1).first()
 precinctrow = precinctrow[0]
 newbuilding = precinctrow.asDict()
 newbuilding['latitude'] =latlng[1]
@@ -91,10 +99,16 @@ newbuilding['address'] = address
 newbuilding['rental_price'] = 0
 
 #mental_health
+house_ids = [ row.house_id for row in buildings.collect()]
+id_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
+
+
+query_string = 'SELECT * FROM mental_health WHERE query_id IN ( SELECT query_id FROM house_id_mental_health WHERE house_id IN '+id_string+' GROUP BY query_id )'
+
 mh = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query","mental_health") \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
@@ -116,11 +130,13 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 newbuilding['house_id'] = building_id
 
 #subway_entrances
+query_string = 'SELECT * FROM subway_entrances WHERE object_id IN ( SELECT object_id FROM building_to_subway WHERE house_id IN '+id_string+' GROUP BY object_id )'
+
 
 subway_entrances = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","subway_entrances") \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
@@ -136,11 +152,13 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 
 
 #crime
+query_string = 'SELECT * FROM nypd_crime_data WHERE "CMPLNT_NUM" IN ( SELECT "CMPLNT_NUM" FROM building_id_to_crime_id WHERE house_id IN '+id_string+' GROUP BY "CMPLNT_NUM" )'
+
 
 crimes = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable","nypd_crime_data") \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
@@ -164,10 +182,11 @@ def handle_air(geo_entity_name,geo_entity_id, building=precinctrow):
 air_udf = udf(handle_air, BooleanType())
 spark.udf.register("air_udf",handle_air, BooleanType())
 
+query_string = 'SELECT * FROM air_quality WHERE indicator_data_id IN ( SELECT indicator_data_id FROM building_to_air_quality WHERE house_id IN '+id_string+' GROUP BY indicator_data_id)'
 air_quality = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("dbtable",'air_quality') \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
@@ -182,10 +201,12 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 
 
 #collissions
+query_string = 'SELECT * FROM vehicle_collissions WHERE collision_id IN ( SELECT collision_id FROM building_to_collissions WHERE house_id IN '+id_string+' GROUP BY collision_id)'
+
 vehicle_collissions = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query",'vehicle_collissions') \
+    .option("query",query_string) \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
@@ -205,6 +226,7 @@ newbuilding['total_affected'] = calculated_info[0]+calculated_info[1]
 
 
  """
+del newbuilding['distance']
 
 
 
@@ -215,4 +237,6 @@ rdd = sc.parallelize([newbuilding])
 df = rdd.toDF()
 df.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insight", table="final_buildings_set", properties = { "user" : "postgres", "password" : "postgres" } )
 print(building_id)
+
+print("--- %s seconds ---" % (time.time() - start_time))
 spark.stop()
