@@ -75,7 +75,7 @@ class DetailedData extends React.Component{
                   })
             }
         }
-        let url = "https://prod-useast-a.online.tableau.com/t/livinginsight/views/living_insight_sheets/mental_health/jnt297@nyu.edu/483edf18-3de8-4b8f-ae55-55ea292941a2?:display_count=n&:showVizHome=n&:origin=viz_share_link";
+        let url = "https://public.tableau.com/views/living_insight/mental_health?:language=en&:display_count=y&:origin=viz_share_link";
         viz = new tableau.Viz(this.myRef.current, url, options)
         return viz;
     }
