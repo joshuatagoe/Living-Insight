@@ -87,7 +87,8 @@ _distance_udf = spark.udf.register("_distance_udf", handle_distance, BooleanType
 #filter for buildings within 3 miles of address
 buildings = buildings.filter(_building_udf('latitude','longitude'))
 #precinct and community district
-
+building_id = uuid.uuid1()
+building_id = building_id.hex
 #collissions
 house_ids = [ row.house_id for row in buildings.collect()]
 id_string = ('('+','.join("'"+str(x)+"'" for x in house_ids)+')')
