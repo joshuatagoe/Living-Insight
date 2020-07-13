@@ -27,6 +27,7 @@ sc = SparkContext("local", "SparkFile App")
 sqlContext = SQLContext(sc)
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/computedistance.py")
 sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/randomdistribution.py")
+sc.addFile("/home/ubuntu/Housing-Insight/process_datasets/apiconfig.py")
 address = '11 crooke avenue brooklyn new york'
 if(len(sys.argv)>1):
     address = sys.argv[1].lower()

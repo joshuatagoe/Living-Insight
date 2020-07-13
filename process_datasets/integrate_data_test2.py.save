@@ -68,16 +68,15 @@ spark = SparkSession \
     .option("inferSchema","true") \
     .load("s3a://living-insight-data/Mental_Health_Service_Finder_Data.csv")
     
-     """
 
-#define custom functions
+
 _building_udf = spark.udf.register("_building_udf", handle_building, BooleanType())
-_distance_udf = spark.udf.register("_distance_udf", handle_distance, BooleanType())
-
-
+_distance_udf = spark.udf.register("_distance_udf", handle_distance, BooleanType())     """
 building_id = uuid.uuid1()
 building_id = building_id.hex
 
+
+#define custom functions
 vehicle_collissions = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
