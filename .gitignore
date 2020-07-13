@@ -1,5 +1,7 @@
 node_modules
 node-postgres-api/node_modules
 react-frontend/node_modules
-process_datasets/config.
+process_datasets/config.py
 config.py
+apiconfig.py
+process_datasets/apiconfig.py

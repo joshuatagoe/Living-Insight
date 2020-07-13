@@ -5,7 +5,7 @@ UPDATE final_buildings_set SET total_services = (SELECT COUNT(*) FROM house_id_m
 UPDATE final_buildings_set SET total_entrances = (SELECT COUNT(*) FROM building_to_subway WHERE house_id= :v1 ) WHERE house_id= :v1;
 
 -- update crime data
-DROP VIEW IF EXISTS crime_data
+DROP VIEW IF EXISTS crime_data;
 CREATE VIEW crime_data AS SELECT * FROM nypd_crime_data NATURAL JOIN building_id_to_crime_id WHERE house_id= :v1;
 UPDATE final_buildings_set SET total_felonies = (SELECT COUNT(*) FROM crime_data WHERE "LAW_CAT_CD"='FELONY') WHERE house_id= :v1;
 UPDATE final_buildings_set SET total_misdemeanors = (SELECT COUNT(*) FROM crime_data WHERE "LAW_CAT_CD"='MISDEMEANOR' ) WHERE house_id= :v1;
