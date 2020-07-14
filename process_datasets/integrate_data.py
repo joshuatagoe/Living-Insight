@@ -206,7 +206,7 @@ newbuilding['total_affected'] = calculated_info[0]+calculated_info[1]
 
  """
 
-
+del newbuilding['distance']
 
 
 

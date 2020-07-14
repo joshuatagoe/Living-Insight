@@ -99,7 +99,7 @@ newbuilding['rental_price'] = 0
 mh = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query","mental_health") \
+    .option("dbtable,"mental_health") \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
@@ -190,7 +190,7 @@ results.write.mode('append').jdbc("jdbc:postgresql://localhost:5432/living_insig
 vehicle_collissions = spark.read \
     .format("jdbc") \
     .option("url","jdbc:postgresql://localhost:5432/living_insight") \
-    .option("query",'vehicle_collissions') \
+    .option("dbtable",'vehicle_collissions') \
     .option("user","postgres") \
     .option("password", "postgres") \
     .load()
@@ -211,7 +211,7 @@ newbuilding['total_affected'] = calculated_info[0]+calculated_info[1]
 
  """
 
-
+del newbuilding['distance']
 
 
 
